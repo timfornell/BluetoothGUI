@@ -16,30 +16,30 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_7">
     <item row="2" column="0">
-     <layout class="QGridLayout" name="gridLayout_5">
+     <layout class="QGridLayout" name="Missions">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="mission_1">
         <property name="text">
          <string>Mission 1</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="checkBox_2">
+       <widget class="QCheckBox" name="mission_3">
         <property name="text">
          <string>Mission 3</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="checkBox_3">
+       <widget class="QCheckBox" name="mission_4">
         <property name="text">
          <string>Mission 4</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="checkBox_4">
+       <widget class="QCheckBox" name="mission_2">
         <property name="text">
          <string>Mission 2</string>
         </property>
@@ -48,21 +48,21 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="Bluetooth">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="Search_connect">
         <item>
-         <widget class="QPushButton" name="pushButton_10">
+         <widget class="QPushButton" name="search">
           <property name="text">
            <string>Search for device</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox"/>
+         <widget class="QComboBox" name="devices"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_7">
+         <widget class="QPushButton" name="connect">
           <property name="text">
            <string>Connect</string>
           </property>
@@ -71,19 +71,19 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="Connection">
         <property name="sizeConstraint">
          <enum>QLayout::SetNoConstraint</enum>
         </property>
         <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="connected_to">
           <property name="text">
            <string>Connected to:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="connected_device">
           <property name="minimumSize">
            <size>
             <width>191</width>
@@ -100,12 +100,12 @@
      </layout>
     </item>
     <item row="6" column="1">
-     <layout class="QGridLayout" name="gridLayout_2">
+     <layout class="QGridLayout" name="Manual_controls">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
       <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="D">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -118,7 +118,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="Q">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -131,7 +131,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="A">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -144,7 +144,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton_6">
+       <widget class="QPushButton" name="E">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -157,7 +157,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="S">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -170,7 +170,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="W">
         <property name="maximumSize">
          <size>
           <width>51</width>
@@ -185,64 +185,64 @@
      </layout>
     </item>
     <item row="3" column="0">
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="Sliders">
       <item row="2" column="1">
-       <widget class="QSlider" name="horizontalSlider_3">
+       <widget class="QSlider" name="slider_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QSlider" name="horizontalSlider_2">
+       <widget class="QSlider" name="slider_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="label_1">
         <property name="text">
          <string>TextLabel</string>
         </property>
         <property name="buddy">
-         <cstring>horizontalSlider</cstring>
+         <cstring>slider_1</cstring>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QSlider" name="horizontalSlider">
+       <widget class="QSlider" name="slider_1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+        <property name="buddy">
+         <cstring>slider_3</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>TextLabel</string>
         </property>
         <property name="buddy">
-         <cstring>horizontalSlider_3</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-        <property name="buddy">
-         <cstring>horizontalSlider_2</cstring>
+         <cstring>slider_2</cstring>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item row="6" column="0">
-     <layout class="QGridLayout" name="gridLayout_6">
+     <layout class="QGridLayout" name="Start_stop">
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton_8">
+       <widget class="QPushButton" name="stop">
         <property name="minimumSize">
          <size>
           <width>81</width>
@@ -255,7 +255,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_9">
+       <widget class="QPushButton" name="start">
         <property name="minimumSize">
          <size>
           <width>81</width>
