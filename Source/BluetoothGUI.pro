@@ -25,10 +25,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        bluetoothgui.cpp
+        bluetoothgui.cpp \
+    painter.cpp
 
 HEADERS += \
-        bluetoothgui.h
+        bluetoothgui.h \
+    painter.h
 
 FORMS += \
         bluetoothgui.ui
