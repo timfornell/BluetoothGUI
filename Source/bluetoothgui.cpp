@@ -2,9 +2,10 @@
 #include "ui_bluetoothgui.h"
 #include <QTimer>
 
+
 BluetoothGUI::BluetoothGUI(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::BluetoothGUI)
+    ui(new Ui::BluetoothGUI), localDevice(new QBluetoothLocalDevice)
 {
     ui->setupUi(this);
 
@@ -14,26 +15,53 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     connect(timer, &QTimer::timeout, this, &BluetoothGUI::animate);
     timer->start(50);
     image_scale = 1;
+    ui->connected_device->setText("None");
 
 
-//    connect(ui->search, SIGNAL (released()), this, SLOT (SearchForDevices()));
-//    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
+    connect(localDevice, SIGNAL(deviceDisconnected(QBluetoothAddress)), this, SLOT(lostConnection(QBluetoothAddress)));
+    connect(localDevice, SIGNAL(deviceConnected(QBluetoothAddress)), this, SLOT(newConnection(QBluetoothAddress)));
 
-    // Check if Bluetooth is available on this device
-//    if (localDevice.isValid()) {
+    //    connect(ui->search, SIGNAL (released()), this, SLOT (SearchForDevices()));
+    //    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
 
-//        // Turn Bluetooth on
-//        localDevice.powerOn();
+    // These are not implemented since it doesn't work to connect through the GUI
+    //    connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
+    //    connect(ui->connect, SIGNAL(released()), this, SLOT(ConnectToDevice()));
 
-//        // Read local device name
-//        localDeviceName = localDevice.name();
+//    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
+//            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
 
-//        // Make it visible to others
-//        localDevice.setHostMode(QBluetoothLocalDevice::HostDiscoverable);
+    //     Check if Bluetooth is available on this device
+    if (localDevice->isValid()) {
+        // Turn Bluetooth on
+        localDevice->powerOn();
 
-//        // Get connected devices
-//        remotes = localDevice.connectedDevices();
-//    }
+        // Read local device name
+        localDeviceName = localDevice->name();
+
+        // Make it visible to others
+        localDevice->setHostMode(QBluetoothLocalDevice::HostDiscoverable);
+
+        // Get connected devices
+        QList<QBluetoothAddress> remotes;
+        remotes = localDevice->connectedDevices();
+
+        qDebug() << "My name is: " << localDeviceName;
+        int n = remotes.length();
+        qDebug() << "Connected to " << n << " devices: ";
+        for(int i = 0; i < n; i ++){
+            qDebug() << remotes.at(i) << ", ";
+        }
+
+        // The address for HM-10 on arduino is: D4:36:39:D8:D8:23, check if it is connected
+        for(int i = 0; i < remotes.length(); i++){
+            if(remotes.at(i).toString() == "D4:36:39:D8:D8:23"){
+                connectedDeviceAddress = remotes.at(i);
+                qDebug() << "Found HM10!";
+                ui->connected_device->setText("HM-10");
+            }
+        }
+    }
 }
 
 BluetoothGUI::~BluetoothGUI()
@@ -66,20 +94,121 @@ void BluetoothGUI::wheelEvent(QWheelEvent *event){
     image_scale += 0.01*scrolls;
     qDebug() << "Scale: " << image_scale;
 }
-// Slots
-/*void BluetoothGUI::SearchForDevices()
+
+void BluetoothGUI::sendTestMessage(const QString &message)
+{
+    QByteArray text = message.toUtf8();
+}
+
+void BluetoothGUI::startScan()
+{
+    qDebug() << "Start scan ...";
+    startDeviceDiscovery();
+    addDevicesToList();
+    qDebug() << "Scanning complete.";
+}
+
+/*
+ *  Search for nearvy devices
+ */
+void BluetoothGUI::startDeviceDiscovery()
+{
+    // Clear list of nearby devices
+    nearbyDevices.clear();
+
+    // Create a discovery agent and connect to its signals
+    QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+    connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+            this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
+
+    // Start a discovery
+    discoveryAgent->start();
+}
+
+/*
+ * When a device is discovered it is added to list of nearby devices
+ */
+void BluetoothGUI::deviceDiscovered(const QBluetoothDeviceInfo &device)
+{
+    nearbyDevices.append(device);
+
+    qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+}
+
+/*
+ * When a device has disconnected
+ * */
+void BluetoothGUI::lostConnection(const QBluetoothAddress &address)
+{
+    if(address.toString() == "D4:36:39:D8:D8:23"){
+        qDebug() << "Lost connection to HM-10!";
+        ui->connected_device->setText("None");
+    }
+}
+
+/*
+ * When a device is connected
+ * */
+void BluetoothGUI::newConnection(const QBluetoothAddress &address)
+{
+    if(address.toString() == "D4:36:39:D8:D8:23"){
+        qDebug() << "Found connection to HM-10!";
+        ui->connected_device->setText("HM-10");
+    }
+}
+
+/*
+ * Adds devives in list nearbyDevices to the list presented in the GUI
+ * */
+void BluetoothGUI::addDevicesToList()
 {
     // Clear list
     ui->devices->clear();
 
-    for(int i = 0; i < 5; i++){
-        QString s = "Testing";
-        ui->devices->addItem(s);
+    for(int i = 0; i < nearbyDevices.length(); i++){
+        ui->devices->addItem(nearbyDevices.at(i).name());
     }
 }
 
+/*
+ * Function that attempts to connect to the selected device.
+ * */
 void BluetoothGUI::ConnectToDevice()
 {
     int index = ui->devices->currentIndex();
-    qDebug("Index: %d", index);
-}*/
+    qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
+
+    // Establish connection
+    connectedDevice = nearbyDevices.at(index);
+    QBluetoothAddress address = connectedDevice.address();
+    localDevice->requestPairing(address, QBluetoothLocalDevice::Paired);
+}
+
+
+/*
+ * When pairing has been performed this funciton handles the output, if it succeeded or not.
+ * */
+void BluetoothGUI::pairingDone(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing)
+{
+    //    QList<QListWidgetItem *> items = ui->devices->findItems(address.toString(), Qt::MatchContains);
+
+    if (pairing == QBluetoothLocalDevice::Paired || pairing == QBluetoothLocalDevice::AuthorizedPaired ) {
+        ui->connected_device->setText(connectedDevice.name());
+    } else {
+        ui->connected_device->setText("None");
+    }
+}
+
+// Slots
+//void BluetoothGUI::SearchForDevices()
+//{
+//    // Clear list
+//    ui->devices->clear();
+
+//    for(int i = 0; i < 5; i++){
+//        QString s = "Testing";
+//        ui->devices->addItem(s);
+//    }
+//}
+
+

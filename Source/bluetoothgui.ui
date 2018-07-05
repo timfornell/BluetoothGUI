@@ -273,21 +273,7 @@
      <widget class="QOpenGLWidget" name="openGLWidget"/>
     </item>
     <item row="0" column="1" rowspan="4">
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>479</width>
-         <height>579</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
+     <widget class="QTextBrowser" name="console"/>
     </item>
    </layout>
   </widget>
