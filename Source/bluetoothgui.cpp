@@ -9,14 +9,20 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Can only change focus with mouse clicks
+    setFocusPolicy(Qt::ClickFocus);
+    // Allow graphical widget to accept focus by mouseclick
+    ui->openGLWidget->setFocusPolicy(Qt::ClickFocus);
+
     elapsed = 0;
     ui->openGLWidget->setAutoFillBackground(false);
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &BluetoothGUI::animate);
     timer->start(50);
     image_scale = 1;
+    translation.setX(0);
+    translation.setY(0);
     ui->connected_device->setText("None");
-
 
     connect(localDevice, SIGNAL(deviceDisconnected(QBluetoothAddress)), this, SLOT(lostConnection(QBluetoothAddress)));
     connect(localDevice, SIGNAL(deviceConnected(QBluetoothAddress)), this, SLOT(newConnection(QBluetoothAddress)));
@@ -48,7 +54,7 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
 
         qDebug() << "My name is: " << localDeviceName;
         int n = remotes.length();
-        qDebug() << "Connected to " << n << " devices: ";
+        qDebug() << "Connected to " << n << " device(s): ";
         for(int i = 0; i < n; i ++){
             qDebug() << remotes.at(i) << ", ";
         }
@@ -84,16 +90,81 @@ void BluetoothGUI::paintEvent(QPaintEvent *event)
     QPainter painter;
     painter.begin(ui->openGLWidget);
     painter.setRenderHint(QPainter::Antialiasing);
-    brush.paint(&painter, event, elapsed, origin_x, origin_y, image_scale);
+    brush.paint(&painter, event, elapsed, origin_x, origin_y, image_scale, translation);
     painter.end();
 }
 
+/*
+ * Handles events produces when scrolling mouse wheel
+ * */
 void BluetoothGUI::wheelEvent(QWheelEvent *event){
-    QPoint numDegrees = event->angleDelta() / 8 / 15;
-    int scrolls = numDegrees.y();
-    image_scale += 0.01*scrolls;
-    qDebug() << "Scale: " << image_scale;
+    // If map is in focus
+    if(ui->openGLWidget->hasFocus()){
+        // Calculate the number of degrees the wheel has been turned
+        QPoint numDegrees = event->angleDelta() / 8 / 15;
+        int scrolls = numDegrees.y();
+        // If the image is larger than 0.01 and the direction is positive
+        if(image_scale > 0.01 || scrolls > 0){
+            image_scale += 0.01*scrolls;
+        }
+        // If the directions is negative or the scale somehow ended up smaller than 0.01
+        else if(scrolls < 0 && image_scale <= 0.01){
+            image_scale = 0.01;
+        }
+        qDebug() << "Scale: " << image_scale;
+    }
 }
+
+/*
+ * Handles events produces when pressing any mouse button
+ * */
+void BluetoothGUI::mousePressEvent(QMouseEvent *event){
+    // If left button is pressed
+    if(event->button() == Qt::LeftButton){
+        // If the map is in focus
+        if(ui->openGLWidget->hasFocus()){
+            dragging_map = true;
+            // Start position of the cursor
+            cursor_start = event->pos() + translation;
+
+        }
+    }
+}
+
+/*
+ * Handles events produces when any mouse button is released
+ * */
+void BluetoothGUI::mouseReleaseEvent(QMouseEvent *event){
+    // If the left button is released and dragging_map is true
+    if (event->button() == Qt::LeftButton && dragging_map) {
+        // Calculate new translsation
+        translateMap(event->pos());
+        dragging_map = false;
+    }
+}
+
+
+/*
+ * Handles events produces when the mouse is moved
+ * */
+void BluetoothGUI::mouseMoveEvent(QMouseEvent *event){
+    // If leftmouse is pressed and the map is being dragged
+    if((event->buttons() & Qt::LeftButton) && dragging_map){
+        // Calculate new translation
+        translateMap(event->pos());
+    }
+}
+
+/*
+ * Translates the map in the openGLwidget
+ * */
+void BluetoothGUI::translateMap(QPoint mouse_position){
+    // Calculate translation from the starting position of the cursor
+    QPoint new_translation = (cursor_start - mouse_position);
+    qDebug() << "Translation: " << new_translation;
+    translation = new_translation;
+}
+
 
 void BluetoothGUI::sendTestMessage(const QString &message)
 {
@@ -111,6 +182,7 @@ void BluetoothGUI::startScan()
 /*
  *  Search for nearvy devices
  */
+
 void BluetoothGUI::startDeviceDiscovery()
 {
     // Clear list of nearby devices

@@ -10,7 +10,7 @@ public:
     Painter();
 
 public:
-    void paint(QPainter *painter, QPaintEvent *event, int elapsed, int origin_x, int origin_y, double scale);
+    void paint(QPainter *painter, QPaintEvent *event, int elapsed, int origin_x, int origin_y, double scale, QPoint translation);
 
 private:
     QBrush background;

@@ -18,13 +18,21 @@ class BluetoothGUI : public QMainWindow
 
 public:
     explicit BluetoothGUI(QWidget *parent = 0);
-    ~BluetoothGUI();
+    ~BluetoothGUI() override;
+
+    // Functions regarding the map
     void animate();
-    void paintEvent(QPaintEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
+    void translateMap(QPoint pos);
+
     void startDeviceDiscovery();
     void addDevicesToList();
 
+    // Override functions
+    void paintEvent(QPaintEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 public slots:
 //    void SearchForDevices();
@@ -40,9 +48,15 @@ public slots:
 
 private:
     Ui::BluetoothGUI *ui;
-    Painter brush;
+
     int elapsed;
+
+    // Variables for the openGLwidget
+    Painter brush;
     double image_scale;
+    bool dragging_map;
+    QPoint cursor_start;
+    QPoint translation;
 
     // Host info
     QBluetoothLocalDevice *localDevice;

@@ -14,10 +14,11 @@ Painter::Painter()
     textFont.setPixelSize(50);
 }
 
-void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, int origin_x, int origin_y, double scale)
+void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, int origin_x, int origin_y, double scale, QPoint translation)
 {
     painter->fillRect(event->rect(), background);
-    painter->translate(origin_x, origin_y);
+    // Translate paintbrush
+    painter->translate(origin_x - translation.x(), origin_y - translation.y());
     painter->save();
     painter->setBrush(circleBrush);
     painter->setPen(circlePen);
@@ -30,8 +31,8 @@ void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, int orig
         qreal factor = (i + r) / n;
         qreal radius = 0 + 120.0 * factor;
         qreal circleRadius = 1 + factor * 20;
-        painter->drawEllipse(QRectF(radius, -circleRadius,
-                                    circleRadius * 2, circleRadius * 2));
+        painter->drawEllipse(QRectF(scale*radius, -scale*circleRadius,
+                                    scale*circleRadius * 2, scale*circleRadius * 2));
     }
     painter->restore();
     painter->setPen(textPen);
