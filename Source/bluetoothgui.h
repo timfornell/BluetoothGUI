@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QtBluetooth>
 #include <QBluetoothLocalDevice>
+#include <QFile>
+
 #include "painter.h"
+
 //#include <QList>
 //#include <QString>
 
@@ -45,6 +48,9 @@ public slots:
     void pairingDone(const QBluetoothAddress &address,QBluetoothLocalDevice::Pairing pairing);
     void lostConnection(const QBluetoothAddress &address);
     void newConnection(const QBluetoothAddress &address);
+    void resetZoom();
+    void resetTranslation();
+    void drawEstimatedPositions(bool checked);
 
 private:
     Ui::BluetoothGUI *ui;
@@ -57,6 +63,9 @@ private:
     bool dragging_map;
     QPoint cursor_start;
     QPoint translation;
+    bool draw_position;
+
+    QString path;
 
     // Host info
     QBluetoothLocalDevice *localDevice;

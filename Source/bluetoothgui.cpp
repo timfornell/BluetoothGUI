@@ -22,10 +22,22 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     image_scale = 1;
     translation.setX(0);
     translation.setY(0);
+    draw_position = false;
+
     ui->connected_device->setText("None");
+    ui->mission_1->setCheckState(Qt::Unchecked);
 
     connect(localDevice, SIGNAL(deviceDisconnected(QBluetoothAddress)), this, SLOT(lostConnection(QBluetoothAddress)));
     connect(localDevice, SIGNAL(deviceConnected(QBluetoothAddress)), this, SLOT(newConnection(QBluetoothAddress)));
+
+    // Connect map signals
+    connect(ui->actionReset_translation, SIGNAL(triggered()), this, SLOT(resetTranslation()));
+    connect(ui->actionReset_zoom, SIGNAL(triggered()), this, SLOT(resetZoom()));
+    connect(ui->mission_1, SIGNAL(toggled(bool)), this, SLOT(drawEstimatedPositions(bool)));
+
+    // Watcher that detects changes in the outputfile
+    path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt";
+    brush.setPath(path);
 
     //    connect(ui->search, SIGNAL (released()), this, SLOT (SearchForDevices()));
     //    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
@@ -34,8 +46,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     //    connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
     //    connect(ui->connect, SIGNAL(released()), this, SLOT(ConnectToDevice()));
 
-//    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
-//            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
+    //    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
+    //            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
 
     //     Check if Bluetooth is available on this device
     if (localDevice->isValid()) {
@@ -83,14 +95,12 @@ void BluetoothGUI::animate()
 
 void BluetoothGUI::paintEvent(QPaintEvent *event)
 {
-    QSize size =  ui->openGLWidget->size();
-    int origin_x = size.width()/2;
-    int origin_y = size.height()/2;
+    brush.setOrigin(ui->openGLWidget->size());
 
     QPainter painter;
     painter.begin(ui->openGLWidget);
     painter.setRenderHint(QPainter::Antialiasing);
-    brush.paint(&painter, event, elapsed, origin_x, origin_y, image_scale, translation);
+    brush.paint(&painter, event, elapsed, image_scale, translation, draw_position);
     painter.end();
 }
 
@@ -112,6 +122,10 @@ void BluetoothGUI::wheelEvent(QWheelEvent *event){
             image_scale = 0.01;
         }
         qDebug() << "Scale: " << image_scale;
+
+        double real_scale = brush.getImageScale()*image_scale;
+        QString text = QString::number(real_scale);
+        ui->scale->setText(text);
     }
 }
 
@@ -165,6 +179,30 @@ void BluetoothGUI::translateMap(QPoint mouse_position){
     translation = new_translation;
 }
 
+/*
+ * Resets translation
+ * */
+void BluetoothGUI::resetTranslation(){
+    qDebug() << "Reset translation";
+    translation.setX(0);
+    translation.setY(0);
+}
+/*
+ * Resets zoom
+ * */
+void BluetoothGUI::resetZoom(){
+    qDebug() << "Reset zoom";
+    image_scale = 1;
+}
+
+/*
+ * When the checkbox "draw position" is checked
+ * */
+void BluetoothGUI::drawEstimatedPositions(bool checked){
+    // Set variable to true
+    qDebug() << "Draw position is" << checked;
+    draw_position = checked;
+}
 
 void BluetoothGUI::sendTestMessage(const QString &message)
 {

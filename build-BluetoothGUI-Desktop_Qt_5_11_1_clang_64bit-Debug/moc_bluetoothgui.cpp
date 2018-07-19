@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_BluetoothGUI_t {
-    QByteArrayData data[16];
-    char stringdata0[215];
+    QByteArrayData data[20];
+    char stringdata0[273];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -46,7 +46,11 @@ QT_MOC_LITERAL(11, 139, 7), // "address"
 QT_MOC_LITERAL(12, 147, 30), // "QBluetoothLocalDevice::Pairing"
 QT_MOC_LITERAL(13, 178, 7), // "pairing"
 QT_MOC_LITERAL(14, 186, 14), // "lostConnection"
-QT_MOC_LITERAL(15, 201, 13) // "newConnection"
+QT_MOC_LITERAL(15, 201, 13), // "newConnection"
+QT_MOC_LITERAL(16, 215, 9), // "resetZoom"
+QT_MOC_LITERAL(17, 225, 16), // "resetTranslation"
+QT_MOC_LITERAL(18, 242, 22), // "drawEstimatedPositions"
+QT_MOC_LITERAL(19, 265, 7) // "checked"
 
     },
     "BluetoothGUI\0sendTestMessage\0\0message\0"
@@ -54,7 +58,9 @@ QT_MOC_LITERAL(15, 201, 13) // "newConnection"
     "device\0startScan\0ConnectToDevice\0"
     "pairingDone\0QBluetoothAddress\0address\0"
     "QBluetoothLocalDevice::Pairing\0pairing\0"
-    "lostConnection\0newConnection"
+    "lostConnection\0newConnection\0resetZoom\0"
+    "resetTranslation\0drawEstimatedPositions\0"
+    "checked"
 };
 #undef QT_MOC_LITERAL
 
@@ -64,7 +70,7 @@ static const uint qt_meta_data_BluetoothGUI[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+      10,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -72,13 +78,16 @@ static const uint qt_meta_data_BluetoothGUI[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   49,    2, 0x0a /* Public */,
-       4,    1,   52,    2, 0x0a /* Public */,
-       7,    0,   55,    2, 0x0a /* Public */,
-       8,    0,   56,    2, 0x0a /* Public */,
-       9,    2,   57,    2, 0x0a /* Public */,
-      14,    1,   62,    2, 0x0a /* Public */,
-      15,    1,   65,    2, 0x0a /* Public */,
+       1,    1,   64,    2, 0x0a /* Public */,
+       4,    1,   67,    2, 0x0a /* Public */,
+       7,    0,   70,    2, 0x0a /* Public */,
+       8,    0,   71,    2, 0x0a /* Public */,
+       9,    2,   72,    2, 0x0a /* Public */,
+      14,    1,   77,    2, 0x0a /* Public */,
+      15,    1,   80,    2, 0x0a /* Public */,
+      16,    0,   83,    2, 0x0a /* Public */,
+      17,    0,   84,    2, 0x0a /* Public */,
+      18,    1,   85,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString,    3,
@@ -88,6 +97,9 @@ static const uint qt_meta_data_BluetoothGUI[] = {
     QMetaType::Void, 0x80000000 | 10, 0x80000000 | 12,   11,   13,
     QMetaType::Void, 0x80000000 | 10,   11,
     QMetaType::Void, 0x80000000 | 10,   11,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Bool,   19,
 
        0        // eod
 };
@@ -105,6 +117,9 @@ void BluetoothGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 4: _t->pairingDone((*reinterpret_cast< const QBluetoothAddress(*)>(_a[1])),(*reinterpret_cast< QBluetoothLocalDevice::Pairing(*)>(_a[2]))); break;
         case 5: _t->lostConnection((*reinterpret_cast< const QBluetoothAddress(*)>(_a[1]))); break;
         case 6: _t->newConnection((*reinterpret_cast< const QBluetoothAddress(*)>(_a[1]))); break;
+        case 7: _t->resetZoom(); break;
+        case 8: _t->resetTranslation(); break;
+        case 9: _t->drawEstimatedPositions((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -169,13 +184,13 @@ int BluetoothGUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 10;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 10;
     }
     return _id;
 }
