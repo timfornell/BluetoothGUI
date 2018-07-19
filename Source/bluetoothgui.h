@@ -29,6 +29,7 @@ public:
 
     void startDeviceDiscovery();
     void addDevicesToList();
+    void setScaleText();
 
     // Override functions
     void paintEvent(QPaintEvent *event) override;

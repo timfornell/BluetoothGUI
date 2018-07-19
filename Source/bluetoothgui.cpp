@@ -20,6 +20,7 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     connect(timer, &QTimer::timeout, this, &BluetoothGUI::animate);
     timer->start(50);
     image_scale = 1;
+    setScaleText();
     translation.setX(0);
     translation.setY(0);
     draw_position = false;
@@ -93,6 +94,12 @@ void BluetoothGUI::animate()
     update();
 }
 
+void BluetoothGUI::setScaleText(){
+    double real_scale = brush.getImageScale()*image_scale;
+    QString text = QString::number(real_scale);
+    ui->scale->setText(text);
+}
+
 void BluetoothGUI::paintEvent(QPaintEvent *event)
 {
     brush.setOrigin(ui->openGLWidget->size());
@@ -123,9 +130,7 @@ void BluetoothGUI::wheelEvent(QWheelEvent *event){
         }
         qDebug() << "Scale: " << image_scale;
 
-        double real_scale = brush.getImageScale()*image_scale;
-        QString text = QString::number(real_scale);
-        ui->scale->setText(text);
+        setScaleText();
     }
 }
 
@@ -193,6 +198,7 @@ void BluetoothGUI::resetTranslation(){
 void BluetoothGUI::resetZoom(){
     qDebug() << "Reset zoom";
     image_scale = 1;
+    setScaleText();
 }
 
 /*

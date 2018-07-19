@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QFileSystemWatcher>
 #include <QDebug>
+#include <QtMath>
 
 #include "painter.h"
 
@@ -17,7 +18,7 @@ Painter::Painter()
     textPen = QPen(Qt::black);
     textFont.setPixelSize(50);
     // 5 pixels = 1 meter
-    image_scale = 5;
+    image_scale = 10;
     nstates = 2;
 }
 
@@ -87,7 +88,7 @@ void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, double s
 
 bool Painter::drawPositions(QPainter *painter, double scale)
 {
-    float small_circle = 5;
+    float small_circle = 1;
     double drawing_scale = scale*image_scale;
 
     // Open file
@@ -126,22 +127,23 @@ bool Painter::drawPositions(QPainter *painter, double scale)
         qDebug() << "pos.x; " << pos.x() << "pos.y: " << pos.y() << "pos width: " << pos.width() << "pos height: " << pos.height();
         painter->drawEllipse(pos);
         // Draw circle for uncertainty
-        QRect P = QRect(drawing_scale*(x-P11/2), -drawing_scale*(y+P22/2)
-                        , drawing_scale*P11, drawing_scale*P22);
+        QRect P = QRect(drawing_scale*(x-2*qSqrt(P11)/2), -drawing_scale*(y+2*qSqrt(P22)/2)
+                        , 2*drawing_scale*qSqrt(P11), 2*drawing_scale*qSqrt(P22));
         qDebug() << "P.x; " << P.x() << "P.y: " << P.y() << "P width: " << P.width() << "P height: " << P.height();
         painter->setBrush(QColor(0,0,255, 0));
         painter->drawEllipse(P);
     }
 
-//    // Draw scale
-//    int offset = 10;
-//    painter->translate(image_translation.x(), image_translation.y());
-//    painter->save();
-//    painter->drawEllipse(QRect(0,0,10,10));
-//    QLine real_scale = QLine(-(origin_x/2+offset), origin_y/2+offset,
-//                             -(origin_x/2+offset+10*image_scale),origin_y/2+offset);
-//    qDebug() << "p1: " << real_scale.p1() << "p2: " << real_scale.p2();
-//    painter->drawLine(real_scale);
+    // Draw scale
+    int offset = 10;
+    painter->translate(image_translation.x(), image_translation.y());
+    painter->save();
+    // Draw line representing 5 meters
+    QLine real_scale = QLine(-origin_x+offset, origin_y-offset,
+                             -origin_x+10*(drawing_scale)+offset,origin_y-offset);
+    qDebug() << "p1: " << real_scale.p1() << "p2: " << real_scale.p2();
+    painter->drawLine(real_scale);
+    painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "1 m");
 
     return true;
 }
