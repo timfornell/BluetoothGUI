@@ -43,47 +43,17 @@ void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, double s
     painter->fillRect(event->rect(), background);
     painter->translate(origin_x - translation.x(), origin_y - translation.y());
     image_translation = translation;
-    painter->save();
-    painter->setBrush(circleBrush);
-    painter->setPen(circlePen);
 
     // If draw_position is true, read positions from the file
     if(draw_position){
-
         qDebug() << "Read from file";
         bool drawing_succeded = drawPositions(painter, scale);
         if(!drawing_succeded){
             qDebug() << "Something went wrong, could not open file";
         }
+        // Don't know why this has to be here, but it does.
+        painter->restore();
     }
-
-
-    // Rotating circles
-    //    painter->rotate(elapsed * 0.030);
-
-    //    qreal r = elapsed / 1000.0;
-    //    int n = 30;
-    //    for (int i = 0; i < n; ++i) {
-    //        painter->rotate(30);
-    //        qreal factor = (i + r) / n;
-    //        qreal radius = 0 + 120.0 * factor;
-    //        qreal circleRadius = 1 + factor * 20;
-    //        painter->drawEllipse(QRectF(scale*radius, -scale*circleRadius,
-    //                                    scale*circleRadius * 2, scale*circleRadius * 2));
-    //    }
-
-    //    painter->restore();
-    //    painter->setPen(textPen);
-    //    painter->setFont(textFont);
-    //    double x = -drawing_scale*origin_x/2;
-    //    double y = -drawing_scale*origin_y/2;
-    //    double width = drawing_scale*origin_x;
-    //    double height = drawing_scale*origin_y;
-    //    qDebug() << "x: " << x;
-    //    qDebug() << "y: " << y;
-    //    qDebug() << "Widht: " << width;
-    //    qDebug() << "Height: " << height;
-    //    painter->drawRect(QRect(x, y, width, height));
 }
 
 bool Painter::drawPositions(QPainter *painter, double scale)
@@ -126,10 +96,12 @@ bool Painter::drawPositions(QPainter *painter, double scale)
                           , drawing_scale*small_circle, drawing_scale*small_circle);
         qDebug() << "pos.x; " << pos.x() << "pos.y: " << pos.y() << "pos width: " << pos.width() << "pos height: " << pos.height();
         painter->drawEllipse(pos);
+
         // Draw circle for uncertainty
         QRect P = QRect(drawing_scale*(x-2*qSqrt(P11)/2), -drawing_scale*(y+2*qSqrt(P22)/2)
                         , 2*drawing_scale*qSqrt(P11), 2*drawing_scale*qSqrt(P22));
         qDebug() << "P.x; " << P.x() << "P.y: " << P.y() << "P width: " << P.width() << "P height: " << P.height();
+
         painter->setBrush(QColor(0,0,255, 0));
         painter->drawEllipse(P);
     }
@@ -144,6 +116,6 @@ bool Painter::drawPositions(QPainter *painter, double scale)
     qDebug() << "p1: " << real_scale.p1() << "p2: " << real_scale.p2();
     painter->drawLine(real_scale);
     painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "1 m");
-
+    qDebug() << "Return true";
     return true;
 }

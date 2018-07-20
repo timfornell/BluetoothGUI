@@ -44,8 +44,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     //    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
 
     // These are not implemented since it doesn't work to connect through the GUI
-    //    connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
-    //    connect(ui->connect, SIGNAL(released()), this, SLOT(ConnectToDevice()));
+        connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
+        connect(ui->connect, SIGNAL(released()), this, SLOT(ConnectToDevice()));
 
     //    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
     //            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
@@ -107,6 +107,7 @@ void BluetoothGUI::paintEvent(QPaintEvent *event)
     QPainter painter;
     painter.begin(ui->openGLWidget);
     painter.setRenderHint(QPainter::Antialiasing);
+
     brush.paint(&painter, event, elapsed, image_scale, translation, draw_position);
     painter.end();
 }
