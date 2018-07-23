@@ -28,7 +28,7 @@ public:
     void translateMap(QPoint pos);
 
     void startDeviceDiscovery();
-    void addDevicesToList();
+    void addDeviceNamesToList();
     void setScaleText();
 
     // Override functions
@@ -38,20 +38,29 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+    void createSocket();
+
 public slots:
 //    void SearchForDevices();
 
 //    void DrawTrajectory();
     void sendTestMessage(const QString &message);
-    void deviceDiscovered(const QBluetoothDeviceInfo &device);
+    void newDeviceDiscovered(const QBluetoothDeviceInfo &device);
     void startScan();
-    void ConnectToDevice();
+    void scanFinished();
+    void scanError(QBluetoothDeviceDiscoveryAgent::Error error);
+    void serviceDiscovered(const QBluetoothUuid &newService);
+    void serviceScanDone();
+    void connectToDevice();
     void pairingDone(const QBluetoothAddress &address,QBluetoothLocalDevice::Pairing pairing);
     void lostConnection(const QBluetoothAddress &address);
     void newConnection(const QBluetoothAddress &address);
     void resetZoom();
     void resetTranslation();
     void drawEstimatedPositions(bool checked);
+    void serviceStateChanged(QLowEnergyService::ServiceState s);
+    void readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value);
+    void notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue);
 
 private:
     Ui::BluetoothGUI *ui;
@@ -65,6 +74,7 @@ private:
     QPoint cursor_start;
     QPoint translation;
     bool draw_position;
+    int timeout;
 
     QString path;
 
@@ -75,6 +85,10 @@ private:
     QList<QBluetoothDeviceInfo> nearbyDevices;
     QBluetoothDeviceInfo connectedDevice;
     QBluetoothAddress connectedDeviceAddress;
+
+    QLowEnergyController *LEcontroller;
+    QLowEnergyService *service;
+    QBluetoothSocket *socket;
 //    QList<QBluetoothAddress> nearbyDevices;
 //    // Connected devices
 //    QList<QBluetoothAddress> remotes;

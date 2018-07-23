@@ -24,13 +24,13 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     translation.setX(0);
     translation.setY(0);
     draw_position = false;
+    timeout = 2000;
 
     ui->connected_device->setText("None");
     ui->mission_1->setCheckState(Qt::Unchecked);
 
     connect(localDevice, SIGNAL(deviceDisconnected(QBluetoothAddress)), this, SLOT(lostConnection(QBluetoothAddress)));
     connect(localDevice, SIGNAL(deviceConnected(QBluetoothAddress)), this, SLOT(newConnection(QBluetoothAddress)));
-
     // Connect map signals
     connect(ui->actionReset_translation, SIGNAL(triggered()), this, SLOT(resetTranslation()));
     connect(ui->actionReset_zoom, SIGNAL(triggered()), this, SLOT(resetZoom()));
@@ -44,8 +44,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     //    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
 
     // These are not implemented since it doesn't work to connect through the GUI
-        connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
-        connect(ui->connect, SIGNAL(released()), this, SLOT(ConnectToDevice()));
+    connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
+    connect(ui->connect, SIGNAL(released()), this, SLOT(connectToDevice()));
 
     //    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
     //            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
@@ -72,14 +72,14 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
             qDebug() << remotes.at(i) << ", ";
         }
 
-        // The address for HM-10 on arduino is: D4:36:39:D8:D8:23, check if it is connected
-        for(int i = 0; i < remotes.length(); i++){
-            if(remotes.at(i).toString() == "D4:36:39:D8:D8:23"){
-                connectedDeviceAddress = remotes.at(i);
-                qDebug() << "Found HM10!";
-                ui->connected_device->setText("HM-10");
-            }
-        }
+//        // The address for HM-10 on arduino is: D4:36:39:D8:D8:23, check if it is connected
+//        for(int i = 0; i < remotes.length(); i++){
+//            if(remotes.at(i).toString() == "D4:36:39:D8:D8:23"){
+//                connectedDeviceAddress = remotes.at(i);
+//                qDebug() << "Found HM10!";
+//                ui->connected_device->setText("HM-10");
+//            }
+//        }
     }
 }
 
@@ -193,6 +193,7 @@ void BluetoothGUI::resetTranslation(){
     translation.setX(0);
     translation.setY(0);
 }
+
 /*
  * Resets zoom
  * */
@@ -220,14 +221,21 @@ void BluetoothGUI::startScan()
 {
     qDebug() << "Start scan ...";
     startDeviceDiscovery();
-    addDevicesToList();
-    qDebug() << "Scanning complete.";
+    qDebug() << "Scanning ...";
+}
+
+void BluetoothGUI::scanFinished(){
+    qDebug() << "Scan finished!";
+    addDeviceNamesToList();
+}
+
+void BluetoothGUI::scanError(QBluetoothDeviceDiscoveryAgent::Error error){
+    qDebug() << "Error occured while scanning for devices; " << error;
 }
 
 /*
  *  Search for nearvy devices
  */
-
 void BluetoothGUI::startDeviceDiscovery()
 {
     // Clear list of nearby devices
@@ -235,21 +243,40 @@ void BluetoothGUI::startDeviceDiscovery()
 
     // Create a discovery agent and connect to its signals
     QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
-    connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-            this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
+    discoveryAgent->setLowEnergyDiscoveryTimeout(timeout);
 
+    connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
+            this, &BluetoothGUI::newDeviceDiscovered);
+
+    connect(discoveryAgent, static_cast<void (QBluetoothDeviceDiscoveryAgent::*)(QBluetoothDeviceDiscoveryAgent::Error)>(&QBluetoothDeviceDiscoveryAgent::error),
+            this, &BluetoothGUI::scanError);
+
+    connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &BluetoothGUI::scanFinished);
+    connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &BluetoothGUI::scanFinished);
     // Start a discovery
-    discoveryAgent->start();
+    discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+    //    discoveryAgent->start();
 }
 
 /*
  * When a device is discovered it is added to list of nearby devices
  */
-void BluetoothGUI::deviceDiscovered(const QBluetoothDeviceInfo &device)
+void BluetoothGUI::newDeviceDiscovered(const QBluetoothDeviceInfo &device)
 {
-    nearbyDevices.append(device);
+    if(device.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration){
+        bool new_device = true;
+        for(int i = 0; i < nearbyDevices.size(); i++){
+            if(device.name() == nearbyDevices.at(i).name()){
+                new_device = false;
+            }
+        }
 
-    qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+        if(new_device){
+            nearbyDevices.append(device);
+            qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+            qDebug() << "Uuid: " << device.deviceUuid();
+        }
+    }
 }
 
 /*
@@ -257,10 +284,8 @@ void BluetoothGUI::deviceDiscovered(const QBluetoothDeviceInfo &device)
  * */
 void BluetoothGUI::lostConnection(const QBluetoothAddress &address)
 {
-    if(address.toString() == "D4:36:39:D8:D8:23"){
-        qDebug() << "Lost connection to HM-10!";
-        ui->connected_device->setText("None");
-    }
+    qDebug() << "Lost connection to" << connectedDevice.name();
+    ui->connected_device->setText("None");
 }
 
 /*
@@ -268,16 +293,14 @@ void BluetoothGUI::lostConnection(const QBluetoothAddress &address)
  * */
 void BluetoothGUI::newConnection(const QBluetoothAddress &address)
 {
-    if(address.toString() == "D4:36:39:D8:D8:23"){
-        qDebug() << "Found connection to HM-10!";
-        ui->connected_device->setText("HM-10");
-    }
+    qDebug() << "Connection established to" << connectedDevice.name();
+    ui->connected_device->setText(connectedDevice.name());
 }
 
 /*
  * Adds devives in list nearbyDevices to the list presented in the GUI
  * */
-void BluetoothGUI::addDevicesToList()
+void BluetoothGUI::addDeviceNamesToList()
 {
     // Clear list
     ui->devices->clear();
@@ -287,20 +310,111 @@ void BluetoothGUI::addDevicesToList()
     }
 }
 
+void BluetoothGUI::serviceDiscovered(const QBluetoothUuid &newService){
+    qDebug() << "Service discovered with uuid:" << newService.toString();
+    service = LEcontroller->createServiceObject(newService);
+
+    if(!service){
+        qDebug() << "Cannot create service for uuid";
+        return;
+    }
+
+    connect(service, &QLowEnergyService::stateChanged, this, &BluetoothGUI::serviceStateChanged);
+    service->discoverDetails();
+
+    connect(service, SIGNAL(characteristicRead(const QLowEnergyCharacteristic, const QByteArray)),
+            this, SLOT(readSuccessfull(const QLowEnergyCharacteristic, const QByteArray)));
+    connect(service, SIGNAL(characteristicChanged(const QLowEnergyCharacteristic, const QByteArray)),
+            this, SLOT(notification(const QLowEnergyCharacteristic, const QByteArray)));
+}
+
+void BluetoothGUI::serviceStateChanged(QLowEnergyService::ServiceState s){
+    switch (s) {
+    case QLowEnergyService::ServiceDiscovered:
+    {
+        qDebug() << "Service discovered.";
+
+        const QList<QLowEnergyCharacteristic> chars = service->characteristics();
+        qDebug() << "Found" << chars.size() << "characteristic(s).";
+
+        for(int i = 0; i < chars.size(); i++){
+            qDebug() << "Characteristic uuid:" << chars.at(i).uuid();
+            const QList<QLowEnergyDescriptor> desc = chars.at(i).descriptors();
+
+            // Enable notifications
+            QLowEnergyDescriptor n = chars.at(i).descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+            service->writeDescriptor(n, QByteArray::fromHex("0100"));
+
+            for(int j = 0; j < desc.size(); j++){
+                qDebug() << j << desc.at(j).name() << desc.at(j).uuid();
+            }
+        }
+
+        break;
+    }
+    case QLowEnergyService::DiscoveringServices:
+    {
+        qDebug() << "Discovering service details.";
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void BluetoothGUI::readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value){
+    qDebug() << "Read successfull." << value.toHex().size();
+}
+
+void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue){
+    qDebug() << "Notification received";
+//    service->readCharacteristic(c);
+    qDebug() << "Value: " << c.value();
+}
+
+void BluetoothGUI::createSocket(){
+    socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
+    //    socket->connectToService(service->);
+}
+
+void BluetoothGUI::serviceScanDone(){
+    qDebug() << "Service scan done.";
+}
+
 /*
  * Function that attempts to connect to the selected device.
  * */
-void BluetoothGUI::ConnectToDevice()
+void BluetoothGUI::connectToDevice()
 {
     int index = ui->devices->currentIndex();
     qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
 
-    // Establish connection
+    // Find address of selected device
     connectedDevice = nearbyDevices.at(index);
-    QBluetoothAddress address = connectedDevice.address();
-    localDevice->requestPairing(address, QBluetoothLocalDevice::Paired);
-}
 
+    // Create LE controller
+    LEcontroller = QLowEnergyController::createCentral(connectedDevice, this);
+
+    connect(LEcontroller, &QLowEnergyController::serviceDiscovered,
+            this, &BluetoothGUI::serviceDiscovered);
+    connect(LEcontroller, &QLowEnergyController::discoveryFinished,
+            this, &BluetoothGUI::serviceScanDone);
+    connect(LEcontroller, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
+            this, [this](QLowEnergyController::Error error) {
+        Q_UNUSED(error);
+        qDebug() << "Cannot connect to remote device.";
+    });
+    connect(LEcontroller, &QLowEnergyController::connected, this, [this]() {
+        qDebug() << "Controller connected. Search services...";
+        LEcontroller->discoverServices();
+    });
+    connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
+        qDebug() << "LowEnergy controller disconnected";
+    });
+
+    // Connect
+    LEcontroller->connectToDevice();
+}
 
 /*
  * When pairing has been performed this funciton handles the output, if it succeeded or not.
@@ -315,17 +429,4 @@ void BluetoothGUI::pairingDone(const QBluetoothAddress &address, QBluetoothLocal
         ui->connected_device->setText("None");
     }
 }
-
-// Slots
-//void BluetoothGUI::SearchForDevices()
-//{
-//    // Clear list
-//    ui->devices->clear();
-
-//    for(int i = 0; i < 5; i++){
-//        QString s = "Testing";
-//        ui->devices->addItem(s);
-//    }
-//}
-
 

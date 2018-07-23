@@ -17,7 +17,7 @@ Painter::Painter()
     circlePen.setWidth(1);
     textPen = QPen(Qt::black);
     textFont.setPixelSize(50);
-    // 5 pixels = 1 meter
+    // 10 pixels = 1 meter
     image_scale = 10;
     nstates = 2;
 }
@@ -115,7 +115,7 @@ bool Painter::drawPositions(QPainter *painter, double scale)
                              -origin_x+10*(drawing_scale)+offset,origin_y-offset);
     qDebug() << "p1: " << real_scale.p1() << "p2: " << real_scale.p2();
     painter->drawLine(real_scale);
-    painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "1 m");
+    painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "10 m");
     qDebug() << "Return true";
     return true;
 }
