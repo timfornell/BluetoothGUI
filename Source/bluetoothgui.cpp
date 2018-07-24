@@ -13,6 +13,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     setFocusPolicy(Qt::ClickFocus);
     // Allow graphical widget to accept focus by mouseclick
     ui->openGLWidget->setFocusPolicy(Qt::ClickFocus);
+    ui->command_line->setFocusPolicy(Qt::ClickFocus);
+    ui->centralWidget->setFocusPolicy(Qt::ClickFocus);
 
     // Drawing variables
     elapsed = 0;
@@ -30,6 +32,7 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
 
     // Bluetooth vairables
     timeout = 2000;
+    robot_direction = "still";
 
     ui->connected_device->setText("None");
     ui->mission_1->setCheckState(Qt::Unchecked);
@@ -80,6 +83,87 @@ BluetoothGUI::~BluetoothGUI()
  * Functions regarding input from mouse and keyboard
  *
  * **************************************************************/
+
+/*
+ * Handles events produced when pressing a key
+ * */
+void BluetoothGUI::keyPressEvent(QKeyEvent *event){
+    // If mainwindow has focus
+    qDebug() << "Key pressed: " << event->key();
+    if(ui->centralWidget->hasFocus()){
+        qDebug() << "Mainwindow has focus";
+        switch(event->key()){
+        case Qt::Key_W:
+        {
+            if(robot_direction != "W" && robot_direction != "S" &&
+                    robot_direction != "D" && robot_direction != "A"){
+                robot_direction = "W";
+                QString command("W");
+                sendToDevice(command);
+            }
+
+            break;
+        }
+        case Qt::Key_D:
+        {
+            if(robot_direction != "W" && robot_direction != "S" &&
+                    robot_direction != "D" && robot_direction != "A"){
+                robot_direction = "D";
+                QString command("D");
+                sendToDevice(command);
+            }
+
+            break;
+        }
+        case Qt::Key_A:
+        {
+            if(robot_direction != "W" && robot_direction != "S" &&
+                    robot_direction != "D" && robot_direction != "A"){
+                robot_direction = "A";
+                QString command("A");
+                sendToDevice(command);
+            }
+
+            break;
+        }
+        case Qt::Key_S:
+        {
+            if(robot_direction != "W" && robot_direction != "S" &&
+                    robot_direction != "D" && robot_direction != "A"){
+                robot_direction = "S";
+                QString command("S");
+                sendToDevice(command);
+            }
+
+            break;
+        }
+        default:
+            qDebug() << "Unknown key pressed";
+            break;
+        }
+    }
+}
+
+/*
+ * Handles events produced when releasing a key
+ * */
+void BluetoothGUI::keyReleaseEvent(QKeyEvent *event){
+    int key =  event->key();
+    qDebug() << "Key released: " << key;
+    if(ui->centralWidget->hasFocus()){
+        if((key == Qt::Key_W || key == Qt::Key_A || key == Qt::Key_S || key == Qt::Key_D) && robot_direction != "still"){
+            robot_direction = "still";
+            QString command("STOP");
+            sendToDevice(command);
+        }
+    }else if(ui->command_line->hasFocus()){
+        qDebug() << "Command line has focus";
+        if(key == Qt::Key_Return){
+            // Send the command
+            sendCommand();
+        }
+    }
+}
 
 /*
  * Handles events produces when scrolling mouse wheel
@@ -240,14 +324,16 @@ void BluetoothGUI::sendCommand(){
  * Sends the string to the connected device
  * */
 void BluetoothGUI::sendToDevice(QString &string){
-    QList<QLowEnergyCharacteristic> c = service->characteristics();
+    if(connectedToDevice){
+        QList<QLowEnergyCharacteristic> c = service->characteristics();
 
-    QByteArray byte_string = string.toLocal8Bit();
+        QByteArray byte_string = string.toLocal8Bit();
 
-    for(int i = 0; i < c.size(); i++){
-        service->writeCharacteristic(c.at(i), byte_string,
-                                     QLowEnergyService::WriteMode::WriteWithoutResponse);
-        qDebug() << "Command: " << string << "sent.";
+        for(int i = 0; i < c.size(); i++){
+            service->writeCharacteristic(c.at(i), byte_string,
+                                         QLowEnergyService::WriteMode::WriteWithoutResponse);
+            qDebug() << "Command: " << string << "sent.";
+        }
     }
 }
 
@@ -389,7 +475,9 @@ void BluetoothGUI::connectToDevice()
     connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
         qDebug() << "LowEnergy controller disconnected";
     });
+
     connect(LEcontroller, SIGNAL(disconnected()), this, SLOT(lostConnection()));
+    connect(LEcontroller, SIGNAL(connected()), this, SLOT(newConnection()));
 
     // Connect
     LEcontroller->connectToDevice();
@@ -448,6 +536,11 @@ void BluetoothGUI::serviceStateChanged(QLowEnergyService::ServiceState s){
             }
         }
 
+        // When a characteristic has been found the connection is done
+        if(!connectedToDevice){
+            connectedToDevice = true;
+        }
+
         break;
     }
     case QLowEnergyService::DiscoveringServices:
@@ -468,9 +561,11 @@ void BluetoothGUI::serviceError(QLowEnergyService::ServiceError newError){
  * When a notification is received the connected device has sent something new that has to be read.
  * */
 void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue){
-    qDebug() << "Notification received";
-    //    service->readCharacteristic(c);
-    qDebug() << "Value: " << c.value();
+    if(connectedToDevice){
+        qDebug() << "Notification received";
+        //    service->readCharacteristic(c);
+        qDebug() << "Value: " << c.value();
+    }
 }
 
 void BluetoothGUI::serviceScanDone(){
@@ -492,6 +587,16 @@ void BluetoothGUI::lostConnection()
 {
     qDebug() << "Lost connection to" << connectedDevice.name();
     ui->connected_device->setText("None");
+    connectedToDevice = false;
+}
+
+/*
+ * When a device has connected
+ * */
+void BluetoothGUI::newConnection()
+{
+    qDebug() << "New connection to" << connectedDevice.name();
+    ui->connected_device->setText(connectedDevice.name());
 }
 
 

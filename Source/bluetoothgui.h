@@ -5,11 +5,11 @@
 #include <QtBluetooth>
 #include <QBluetoothLocalDevice>
 #include <QFile>
+//#include <QKeyEvent>
+//#include <QWidget>
 
 #include "painter.h"
 
-//#include <QList>
-//#include <QString>
 
 namespace Ui {
 class BluetoothGUI;
@@ -38,11 +38,10 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 public slots:
-//    void SearchForDevices();
-
-//    void DrawTrajectory();
     void newDeviceDiscovered(const QBluetoothDeviceInfo &device);
     void startScan();
     void scanFinished();
@@ -52,6 +51,7 @@ public slots:
     void connectToDevice();
     void disconnectDevice();
     void lostConnection();
+    void newConnection();
     void resetZoom();
     void resetTranslation();
     void drawEstimatedPositions(bool checked);
@@ -66,10 +66,9 @@ public slots:
 private:
     Ui::BluetoothGUI *ui;
 
-    int elapsed;
-
     // Variables for the openGLwidget
     Painter brush;
+    int elapsed;
     double image_scale;
     bool dragging_map;
     QPoint cursor_start;
@@ -90,10 +89,13 @@ private:
     QLowEnergyController *LEcontroller;
     QLowEnergyService *service;
     QBluetoothSocket *socket;
+    bool connectedToDevice;
 
-//    QList<QBluetoothAddress> nearbyDevices;
-//    // Connected devices
-//    QList<QBluetoothAddress> remotes;
+    QString robot_direction;
+
+    //    QList<QBluetoothAddress> nearbyDevices;
+    //    // Connected devices
+    //    QList<QBluetoothAddress> remotes;
 };
 
 #endif // BLUETOOTHGUI_H
