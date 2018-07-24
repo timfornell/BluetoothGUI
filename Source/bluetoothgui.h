@@ -30,6 +30,7 @@ public:
     void startDeviceDiscovery();
     void addDeviceNamesToList();
     void setScaleText();
+    void sendToDevice(QString &string);
 
     // Override functions
     void paintEvent(QPaintEvent *event) override;
@@ -38,13 +39,10 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-    void createSocket();
-
 public slots:
 //    void SearchForDevices();
 
 //    void DrawTrajectory();
-    void sendTestMessage(const QString &message);
     void newDeviceDiscovered(const QBluetoothDeviceInfo &device);
     void startScan();
     void scanFinished();
@@ -52,15 +50,18 @@ public slots:
     void serviceDiscovered(const QBluetoothUuid &newService);
     void serviceScanDone();
     void connectToDevice();
-    void pairingDone(const QBluetoothAddress &address,QBluetoothLocalDevice::Pairing pairing);
-    void lostConnection(const QBluetoothAddress &address);
-    void newConnection(const QBluetoothAddress &address);
+    void disconnectDevice();
+    void lostConnection();
     void resetZoom();
     void resetTranslation();
     void drawEstimatedPositions(bool checked);
     void serviceStateChanged(QLowEnergyService::ServiceState s);
     void readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value);
     void notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue);
+    void sendCommand();
+    void characteristicWrittenSuccessfully(const QLowEnergyCharacteristic &c,
+                                           const QByteArray &newValue);
+    void serviceError(QLowEnergyService::ServiceError newError);
 
 private:
     Ui::BluetoothGUI *ui;
@@ -89,6 +90,7 @@ private:
     QLowEnergyController *LEcontroller;
     QLowEnergyService *service;
     QBluetoothSocket *socket;
+
 //    QList<QBluetoothAddress> nearbyDevices;
 //    // Connected devices
 //    QList<QBluetoothAddress> remotes;

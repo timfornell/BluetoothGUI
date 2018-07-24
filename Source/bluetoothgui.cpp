@@ -14,6 +14,7 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     // Allow graphical widget to accept focus by mouseclick
     ui->openGLWidget->setFocusPolicy(Qt::ClickFocus);
 
+    // Drawing variables
     elapsed = 0;
     ui->openGLWidget->setAutoFillBackground(false);
     QTimer *timer = new QTimer(this);
@@ -24,31 +25,27 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     translation.setX(0);
     translation.setY(0);
     draw_position = false;
+    path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt";
+    brush.setPath(path);
+
+    // Bluetooth vairables
     timeout = 2000;
 
     ui->connected_device->setText("None");
     ui->mission_1->setCheckState(Qt::Unchecked);
 
-    connect(localDevice, SIGNAL(deviceDisconnected(QBluetoothAddress)), this, SLOT(lostConnection(QBluetoothAddress)));
-    connect(localDevice, SIGNAL(deviceConnected(QBluetoothAddress)), this, SLOT(newConnection(QBluetoothAddress)));
+    // Connect Signals to appropriate Slots
+
     // Connect map signals
     connect(ui->actionReset_translation, SIGNAL(triggered()), this, SLOT(resetTranslation()));
     connect(ui->actionReset_zoom, SIGNAL(triggered()), this, SLOT(resetZoom()));
     connect(ui->mission_1, SIGNAL(toggled(bool)), this, SLOT(drawEstimatedPositions(bool)));
 
-    // Watcher that detects changes in the outputfile
-    path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt";
-    brush.setPath(path);
-
-    //    connect(ui->search, SIGNAL (released()), this, SLOT (SearchForDevices()));
-    //    connect(ui->connect, SIGNAL (released()), this, SLOT (ConnectToDevice()));
-
-    // These are not implemented since it doesn't work to connect through the GUI
+    // Connect buttons in GUI to appropriate functions
     connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
     connect(ui->connect, SIGNAL(released()), this, SLOT(connectToDevice()));
-
-    //    connect(localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing))
-    //            , this, SLOT(pairingDone(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
+    connect(ui->send_command, SIGNAL(released()), this, SLOT(sendCommand()));
+    connect(ui->disconnect, SIGNAL(released()), this, SLOT(disconnectDevice()));
 
     //     Check if Bluetooth is available on this device
     if (localDevice->isValid()) {
@@ -71,15 +68,6 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
         for(int i = 0; i < n; i ++){
             qDebug() << remotes.at(i) << ", ";
         }
-
-//        // The address for HM-10 on arduino is: D4:36:39:D8:D8:23, check if it is connected
-//        for(int i = 0; i < remotes.length(); i++){
-//            if(remotes.at(i).toString() == "D4:36:39:D8:D8:23"){
-//                connectedDeviceAddress = remotes.at(i);
-//                qDebug() << "Found HM10!";
-//                ui->connected_device->setText("HM-10");
-//            }
-//        }
     }
 }
 
@@ -88,29 +76,10 @@ BluetoothGUI::~BluetoothGUI()
     delete ui;
 }
 
-void BluetoothGUI::animate()
-{
-    elapsed = (elapsed + qobject_cast<QTimer*>(sender())->interval()) % 1000;
-    update();
-}
-
-void BluetoothGUI::setScaleText(){
-    double real_scale = brush.getImageScale()*image_scale;
-    QString text = QString::number(real_scale);
-    ui->scale->setText(text);
-}
-
-void BluetoothGUI::paintEvent(QPaintEvent *event)
-{
-    brush.setOrigin(ui->openGLWidget->size());
-
-    QPainter painter;
-    painter.begin(ui->openGLWidget);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    brush.paint(&painter, event, elapsed, image_scale, translation, draw_position);
-    painter.end();
-}
+/*****************************************************************
+ * Functions regarding input from mouse and keyboard
+ *
+ * **************************************************************/
 
 /*
  * Handles events produces when scrolling mouse wheel
@@ -163,7 +132,6 @@ void BluetoothGUI::mouseReleaseEvent(QMouseEvent *event){
     }
 }
 
-
 /*
  * Handles events produces when the mouse is moved
  * */
@@ -173,6 +141,26 @@ void BluetoothGUI::mouseMoveEvent(QMouseEvent *event){
         // Calculate new translation
         translateMap(event->pos());
     }
+}
+
+/*****************************************************************
+ * Functions regarding the map
+ *
+ * **************************************************************/
+
+/*
+ * Paintevent handler
+ * */
+void BluetoothGUI::paintEvent(QPaintEvent *event)
+{
+    brush.setOrigin(ui->openGLWidget->size());
+
+    QPainter painter;
+    painter.begin(ui->openGLWidget);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    brush.paint(&painter, event, elapsed, image_scale, translation, draw_position);
+    painter.end();
 }
 
 /*
@@ -212,25 +200,85 @@ void BluetoothGUI::drawEstimatedPositions(bool checked){
     draw_position = checked;
 }
 
-void BluetoothGUI::sendTestMessage(const QString &message)
+/*
+ * Updates the map when zooming or translating
+ * */
+void BluetoothGUI::animate()
 {
-    QByteArray text = message.toUtf8();
+    elapsed = (elapsed + qobject_cast<QTimer*>(sender())->interval()) % 1000;
+    update();
 }
 
+/*
+ * Indicates how many pixels are equal to 1 meter in the GUI
+ * */
+void BluetoothGUI::setScaleText(){
+    double real_scale = brush.getImageScale()*image_scale;
+    QString text = QString::number(real_scale);
+    ui->scale->setText(text);
+}
+
+/*****************************************************************
+ * Functions regarding bluetooth communication
+ *
+ * **************************************************************/
+
+/*
+ * Sends the command typed in the command line to the connected device
+ * */
+void BluetoothGUI::sendCommand(){
+    qDebug() << "Send command";
+    QString command = ui->command_line->text();
+
+    if(!command.isEmpty()){
+        sendToDevice(command);
+        ui->command_line->setText("");
+    }
+}
+
+/*
+ * Sends the string to the connected device
+ * */
+void BluetoothGUI::sendToDevice(QString &string){
+    QList<QLowEnergyCharacteristic> c = service->characteristics();
+
+    QByteArray byte_string = string.toLocal8Bit();
+
+    for(int i = 0; i < c.size(); i++){
+        service->writeCharacteristic(c.at(i), byte_string,
+                                     QLowEnergyService::WriteMode::WriteWithoutResponse);
+        qDebug() << "Command: " << string << "sent.";
+    }
+}
+
+/*
+ * Indicates that newValue has been sent to the connected device
+ * */
+void BluetoothGUI::characteristicWrittenSuccessfully(const QLowEnergyCharacteristic &c,
+                                                     const QByteArray &newValue){
+    qDebug() << "Write successfull: " << newValue;
+}
+
+/*
+ * Indicates that value was read successfully from the connected device
+ * */
+void BluetoothGUI::readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value){
+    qDebug() << "Read successfull." << value.toHex().size();
+}
+
+/*****************************************************************
+ * Functions used to set up bluetooth communication
+ *
+ * **************************************************************/
+
+/*
+ * Initiates a scan of bluetooth devices
+ * */
 void BluetoothGUI::startScan()
 {
     qDebug() << "Start scan ...";
     startDeviceDiscovery();
     qDebug() << "Scanning ...";
-}
-
-void BluetoothGUI::scanFinished(){
-    qDebug() << "Scan finished!";
-    addDeviceNamesToList();
-}
-
-void BluetoothGUI::scanError(QBluetoothDeviceDiscoveryAgent::Error error){
-    qDebug() << "Error occured while scanning for devices; " << error;
 }
 
 /*
@@ -263,8 +311,11 @@ void BluetoothGUI::startDeviceDiscovery()
  */
 void BluetoothGUI::newDeviceDiscovered(const QBluetoothDeviceInfo &device)
 {
+    // If LE device
     if(device.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration){
         bool new_device = true;
+        // Somehow several detections can be made of the same device.
+        // Therefore check to se if a device with the same name is present in the list already.
         for(int i = 0; i < nearbyDevices.size(); i++){
             if(device.name() == nearbyDevices.at(i).name()){
                 new_device = false;
@@ -280,22 +331,20 @@ void BluetoothGUI::newDeviceDiscovered(const QBluetoothDeviceInfo &device)
 }
 
 /*
- * When a device has disconnected
+ * When scan is finished add discovered devices to the drop down list
  * */
-void BluetoothGUI::lostConnection(const QBluetoothAddress &address)
-{
-    qDebug() << "Lost connection to" << connectedDevice.name();
-    ui->connected_device->setText("None");
+void BluetoothGUI::scanFinished(){
+    qDebug() << "Scan finished!";
+    addDeviceNamesToList();
 }
 
 /*
- * When a device is connected
+ * Indicates that an error occured when scanning
  * */
-void BluetoothGUI::newConnection(const QBluetoothAddress &address)
-{
-    qDebug() << "Connection established to" << connectedDevice.name();
-    ui->connected_device->setText(connectedDevice.name());
+void BluetoothGUI::scanError(QBluetoothDeviceDiscoveryAgent::Error error){
+    qDebug() << "Error occured while scanning for devices; " << error;
 }
+
 
 /*
  * Adds devives in list nearbyDevices to the list presented in the GUI
@@ -310,6 +359,45 @@ void BluetoothGUI::addDeviceNamesToList()
     }
 }
 
+/*
+ * Function that attempts to connect to the selected device.
+ * */
+void BluetoothGUI::connectToDevice()
+{
+    int index = ui->devices->currentIndex();
+    qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
+
+    // Find address of selected device
+    connectedDevice = nearbyDevices.at(index);
+
+    // Create LE controller
+    LEcontroller = QLowEnergyController::createCentral(connectedDevice, this);
+
+    connect(LEcontroller, &QLowEnergyController::serviceDiscovered,
+            this, &BluetoothGUI::serviceDiscovered);
+    connect(LEcontroller, &QLowEnergyController::discoveryFinished,
+            this, &BluetoothGUI::serviceScanDone);
+    connect(LEcontroller, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
+            this, [this](QLowEnergyController::Error error) {
+        Q_UNUSED(error);
+        qDebug() << "Cannot connect to remote device.";
+    });
+    connect(LEcontroller, &QLowEnergyController::connected, this, [this]() {
+        qDebug() << "Controller connected. Search services...";
+        LEcontroller->discoverServices();
+    });
+    connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
+        qDebug() << "LowEnergy controller disconnected";
+    });
+    connect(LEcontroller, SIGNAL(disconnected()), this, SLOT(lostConnection()));
+
+    // Connect
+    LEcontroller->connectToDevice();
+}
+
+/*
+ * When the controller has connected to a device the devices services has to be discovered
+ * */
 void BluetoothGUI::serviceDiscovered(const QBluetoothUuid &newService){
     qDebug() << "Service discovered with uuid:" << newService.toString();
     service = LEcontroller->createServiceObject(newService);
@@ -322,12 +410,22 @@ void BluetoothGUI::serviceDiscovered(const QBluetoothUuid &newService){
     connect(service, &QLowEnergyService::stateChanged, this, &BluetoothGUI::serviceStateChanged);
     service->discoverDetails();
 
+    connect(service, QOverload<QLowEnergyService::ServiceError>::of(&QLowEnergyService::error),
+            [=](QLowEnergyService::ServiceError newError){
+        qDebug() << "Error occured: " << newError;
+    });
+
     connect(service, SIGNAL(characteristicRead(const QLowEnergyCharacteristic, const QByteArray)),
             this, SLOT(readSuccessfull(const QLowEnergyCharacteristic, const QByteArray)));
     connect(service, SIGNAL(characteristicChanged(const QLowEnergyCharacteristic, const QByteArray)),
             this, SLOT(notification(const QLowEnergyCharacteristic, const QByteArray)));
+    connect(service, SIGNAL(characteristicWritten(const QLowEnergyCharacteristic, const QByteArray)),
+            this, SLOT(characteristicWrittenSuccessfully(const QLowEnergyCharacteristic, const QByteArray)));
 }
 
+/*
+ * When discovering services notifications has to be turned on
+ * */
 void BluetoothGUI::serviceStateChanged(QLowEnergyService::ServiceState s){
     switch (s) {
     case QLowEnergyService::ServiceDiscovered:
@@ -362,19 +460,17 @@ void BluetoothGUI::serviceStateChanged(QLowEnergyService::ServiceState s){
     }
 }
 
-void BluetoothGUI::readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value){
-    qDebug() << "Read successfull." << value.toHex().size();
+void BluetoothGUI::serviceError(QLowEnergyService::ServiceError newError){
+    qDebug() << "Error occured: " << newError;
 }
 
+/*
+ * When a notification is received the connected device has sent something new that has to be read.
+ * */
 void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue){
     qDebug() << "Notification received";
-//    service->readCharacteristic(c);
+    //    service->readCharacteristic(c);
     qDebug() << "Value: " << c.value();
-}
-
-void BluetoothGUI::createSocket(){
-    socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-    //    socket->connectToService(service->);
 }
 
 void BluetoothGUI::serviceScanDone(){
@@ -382,51 +478,20 @@ void BluetoothGUI::serviceScanDone(){
 }
 
 /*
- * Function that attempts to connect to the selected device.
+ * Disconnect from connected device
  * */
-void BluetoothGUI::connectToDevice()
-{
-    int index = ui->devices->currentIndex();
-    qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
-
-    // Find address of selected device
-    connectedDevice = nearbyDevices.at(index);
-
-    // Create LE controller
-    LEcontroller = QLowEnergyController::createCentral(connectedDevice, this);
-
-    connect(LEcontroller, &QLowEnergyController::serviceDiscovered,
-            this, &BluetoothGUI::serviceDiscovered);
-    connect(LEcontroller, &QLowEnergyController::discoveryFinished,
-            this, &BluetoothGUI::serviceScanDone);
-    connect(LEcontroller, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
-            this, [this](QLowEnergyController::Error error) {
-        Q_UNUSED(error);
-        qDebug() << "Cannot connect to remote device.";
-    });
-    connect(LEcontroller, &QLowEnergyController::connected, this, [this]() {
-        qDebug() << "Controller connected. Search services...";
-        LEcontroller->discoverServices();
-    });
-    connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
-        qDebug() << "LowEnergy controller disconnected";
-    });
-
-    // Connect
-    LEcontroller->connectToDevice();
+void BluetoothGUI::disconnectDevice(){
+    qDebug() << "Disconnecting" << connectedDevice.name();
+    LEcontroller->disconnectFromDevice();
 }
 
 /*
- * When pairing has been performed this funciton handles the output, if it succeeded or not.
+ * When a device has disconnected
  * */
-void BluetoothGUI::pairingDone(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing)
+void BluetoothGUI::lostConnection()
 {
-    //    QList<QListWidgetItem *> items = ui->devices->findItems(address.toString(), Qt::MatchContains);
-
-    if (pairing == QBluetoothLocalDevice::Paired || pairing == QBluetoothLocalDevice::AuthorizedPaired ) {
-        ui->connected_device->setText(connectedDevice.name());
-    } else {
-        ui->connected_device->setText("None");
-    }
+    qDebug() << "Lost connection to" << connectedDevice.name();
+    ui->connected_device->setText("None");
 }
+
 

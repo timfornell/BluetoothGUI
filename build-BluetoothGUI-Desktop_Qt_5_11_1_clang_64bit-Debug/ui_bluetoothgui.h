@@ -17,6 +17,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -40,13 +41,11 @@ public:
     QGridLayout *Start_stop;
     QPushButton *stop;
     QPushButton *start;
-    QGridLayout *Sliders;
-    QSlider *slider_3;
-    QSlider *slider_2;
-    QLabel *label_1;
-    QSlider *slider_1;
-    QLabel *label_3;
-    QLabel *label_2;
+    QGridLayout *Missions;
+    QCheckBox *mission_1;
+    QCheckBox *mission_3;
+    QCheckBox *mission_4;
+    QCheckBox *mission_2;
     QGridLayout *Manual_controls;
     QPushButton *D;
     QPushButton *Q;
@@ -54,24 +53,30 @@ public:
     QPushButton *E;
     QPushButton *S;
     QPushButton *W;
-    QVBoxLayout *Bluetooth;
-    QVBoxLayout *Search_connect;
-    QPushButton *search;
-    QComboBox *devices;
-    QPushButton *connect;
-    QHBoxLayout *Connection;
-    QLabel *connected_to;
-    QLabel *connected_device;
-    QGridLayout *Missions;
-    QCheckBox *mission_1;
-    QCheckBox *mission_3;
-    QCheckBox *mission_4;
-    QCheckBox *mission_2;
     QTextBrowser *console;
     QHBoxLayout *informationWidget;
     QLabel *label_4;
     QLabel *scale;
     QOpenGLWidget *openGLWidget;
+    QVBoxLayout *Bluetooth;
+    QVBoxLayout *Search_connect;
+    QPushButton *search;
+    QComboBox *devices;
+    QPushButton *connect;
+    QPushButton *disconnect;
+    QHBoxLayout *Connection;
+    QLabel *connected_to;
+    QLabel *connected_device;
+    QGridLayout *Sliders;
+    QSlider *slider_3;
+    QSlider *slider_2;
+    QLabel *label_1;
+    QSlider *slider_1;
+    QLabel *label_3;
+    QLabel *label_2;
+    QHBoxLayout *horizontalLayout;
+    QLineEdit *command_line;
+    QPushButton *send_command;
     QMenuBar *menuBar;
     QMenu *menuMap;
     QToolBar *mainToolBar;
@@ -107,46 +112,33 @@ public:
         Start_stop->addWidget(start, 0, 1, 1, 1);
 
 
-        gridLayout_7->addLayout(Start_stop, 7, 0, 1, 1);
+        gridLayout_7->addLayout(Start_stop, 8, 0, 1, 1);
 
-        Sliders = new QGridLayout();
-        Sliders->setSpacing(6);
-        Sliders->setObjectName(QStringLiteral("Sliders"));
-        slider_3 = new QSlider(centralWidget);
-        slider_3->setObjectName(QStringLiteral("slider_3"));
-        slider_3->setOrientation(Qt::Horizontal);
+        Missions = new QGridLayout();
+        Missions->setSpacing(6);
+        Missions->setObjectName(QStringLiteral("Missions"));
+        mission_1 = new QCheckBox(centralWidget);
+        mission_1->setObjectName(QStringLiteral("mission_1"));
 
-        Sliders->addWidget(slider_3, 2, 1, 1, 1);
+        Missions->addWidget(mission_1, 0, 0, 1, 1);
 
-        slider_2 = new QSlider(centralWidget);
-        slider_2->setObjectName(QStringLiteral("slider_2"));
-        slider_2->setOrientation(Qt::Horizontal);
+        mission_3 = new QCheckBox(centralWidget);
+        mission_3->setObjectName(QStringLiteral("mission_3"));
 
-        Sliders->addWidget(slider_2, 1, 1, 1, 1);
+        Missions->addWidget(mission_3, 1, 0, 1, 1);
 
-        label_1 = new QLabel(centralWidget);
-        label_1->setObjectName(QStringLiteral("label_1"));
+        mission_4 = new QCheckBox(centralWidget);
+        mission_4->setObjectName(QStringLiteral("mission_4"));
 
-        Sliders->addWidget(label_1, 0, 0, 1, 1);
+        Missions->addWidget(mission_4, 1, 1, 1, 1);
 
-        slider_1 = new QSlider(centralWidget);
-        slider_1->setObjectName(QStringLiteral("slider_1"));
-        slider_1->setOrientation(Qt::Horizontal);
+        mission_2 = new QCheckBox(centralWidget);
+        mission_2->setObjectName(QStringLiteral("mission_2"));
 
-        Sliders->addWidget(slider_1, 0, 1, 1, 1);
-
-        label_3 = new QLabel(centralWidget);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        Sliders->addWidget(label_3, 2, 0, 1, 1);
-
-        label_2 = new QLabel(centralWidget);
-        label_2->setObjectName(QStringLiteral("label_2"));
-
-        Sliders->addWidget(label_2, 1, 0, 1, 1);
+        Missions->addWidget(mission_2, 0, 1, 1, 1);
 
 
-        gridLayout_7->addLayout(Sliders, 4, 0, 1, 1);
+        gridLayout_7->addLayout(Missions, 4, 0, 1, 1);
 
         Manual_controls = new QGridLayout();
         Manual_controls->setSpacing(6);
@@ -189,7 +181,33 @@ public:
         Manual_controls->addWidget(W, 0, 1, 1, 1);
 
 
-        gridLayout_7->addLayout(Manual_controls, 7, 1, 1, 1);
+        gridLayout_7->addLayout(Manual_controls, 8, 1, 1, 1);
+
+        console = new QTextBrowser(centralWidget);
+        console->setObjectName(QStringLiteral("console"));
+
+        gridLayout_7->addWidget(console, 1, 1, 5, 1);
+
+        informationWidget = new QHBoxLayout();
+        informationWidget->setSpacing(6);
+        informationWidget->setObjectName(QStringLiteral("informationWidget"));
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        informationWidget->addWidget(label_4);
+
+        scale = new QLabel(centralWidget);
+        scale->setObjectName(QStringLiteral("scale"));
+
+        informationWidget->addWidget(scale);
+
+
+        gridLayout_7->addLayout(informationWidget, 0, 1, 1, 1);
+
+        openGLWidget = new QOpenGLWidget(centralWidget);
+        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
+
+        gridLayout_7->addWidget(openGLWidget, 0, 0, 2, 1);
 
         Bluetooth = new QVBoxLayout();
         Bluetooth->setSpacing(6);
@@ -211,6 +229,11 @@ public:
         connect->setObjectName(QStringLiteral("connect"));
 
         Search_connect->addWidget(connect);
+
+        disconnect = new QPushButton(centralWidget);
+        disconnect->setObjectName(QStringLiteral("disconnect"));
+
+        Search_connect->addWidget(disconnect);
 
 
         Bluetooth->addLayout(Search_connect);
@@ -236,57 +259,60 @@ public:
 
         gridLayout_7->addLayout(Bluetooth, 2, 0, 1, 1);
 
-        Missions = new QGridLayout();
-        Missions->setSpacing(6);
-        Missions->setObjectName(QStringLiteral("Missions"));
-        mission_1 = new QCheckBox(centralWidget);
-        mission_1->setObjectName(QStringLiteral("mission_1"));
+        Sliders = new QGridLayout();
+        Sliders->setSpacing(6);
+        Sliders->setObjectName(QStringLiteral("Sliders"));
+        slider_3 = new QSlider(centralWidget);
+        slider_3->setObjectName(QStringLiteral("slider_3"));
+        slider_3->setOrientation(Qt::Horizontal);
 
-        Missions->addWidget(mission_1, 0, 0, 1, 1);
+        Sliders->addWidget(slider_3, 2, 1, 1, 1);
 
-        mission_3 = new QCheckBox(centralWidget);
-        mission_3->setObjectName(QStringLiteral("mission_3"));
+        slider_2 = new QSlider(centralWidget);
+        slider_2->setObjectName(QStringLiteral("slider_2"));
+        slider_2->setOrientation(Qt::Horizontal);
 
-        Missions->addWidget(mission_3, 1, 0, 1, 1);
+        Sliders->addWidget(slider_2, 1, 1, 1, 1);
 
-        mission_4 = new QCheckBox(centralWidget);
-        mission_4->setObjectName(QStringLiteral("mission_4"));
+        label_1 = new QLabel(centralWidget);
+        label_1->setObjectName(QStringLiteral("label_1"));
 
-        Missions->addWidget(mission_4, 1, 1, 1, 1);
+        Sliders->addWidget(label_1, 0, 0, 1, 1);
 
-        mission_2 = new QCheckBox(centralWidget);
-        mission_2->setObjectName(QStringLiteral("mission_2"));
+        slider_1 = new QSlider(centralWidget);
+        slider_1->setObjectName(QStringLiteral("slider_1"));
+        slider_1->setOrientation(Qt::Horizontal);
 
-        Missions->addWidget(mission_2, 0, 1, 1, 1);
+        Sliders->addWidget(slider_1, 0, 1, 1, 1);
 
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QStringLiteral("label_3"));
 
-        gridLayout_7->addLayout(Missions, 3, 0, 1, 1);
+        Sliders->addWidget(label_3, 2, 0, 1, 1);
 
-        console = new QTextBrowser(centralWidget);
-        console->setObjectName(QStringLiteral("console"));
+        label_2 = new QLabel(centralWidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
 
-        gridLayout_7->addWidget(console, 1, 1, 4, 1);
-
-        informationWidget = new QHBoxLayout();
-        informationWidget->setSpacing(6);
-        informationWidget->setObjectName(QStringLiteral("informationWidget"));
-        label_4 = new QLabel(centralWidget);
-        label_4->setObjectName(QStringLiteral("label_4"));
-
-        informationWidget->addWidget(label_4);
-
-        scale = new QLabel(centralWidget);
-        scale->setObjectName(QStringLiteral("scale"));
-
-        informationWidget->addWidget(scale);
+        Sliders->addWidget(label_2, 1, 0, 1, 1);
 
 
-        gridLayout_7->addLayout(informationWidget, 0, 1, 1, 1);
+        gridLayout_7->addLayout(Sliders, 5, 0, 1, 1);
 
-        openGLWidget = new QOpenGLWidget(centralWidget);
-        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        command_line = new QLineEdit(centralWidget);
+        command_line->setObjectName(QStringLiteral("command_line"));
 
-        gridLayout_7->addWidget(openGLWidget, 0, 0, 2, 1);
+        horizontalLayout->addWidget(command_line);
+
+        send_command = new QPushButton(centralWidget);
+        send_command->setObjectName(QStringLiteral("send_command"));
+
+        horizontalLayout->addWidget(send_command);
+
+
+        gridLayout_7->addLayout(horizontalLayout, 3, 0, 1, 1);
 
         BluetoothGUI->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(BluetoothGUI);
@@ -320,25 +346,27 @@ public:
         actionReset_zoom->setText(QApplication::translate("BluetoothGUI", "Reset zoom", nullptr));
         stop->setText(QApplication::translate("BluetoothGUI", "Stop", nullptr));
         start->setText(QApplication::translate("BluetoothGUI", "Start", nullptr));
-        label_1->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
-        label_3->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
-        label_2->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
+        mission_1->setText(QApplication::translate("BluetoothGUI", "Draw position", nullptr));
+        mission_3->setText(QApplication::translate("BluetoothGUI", "Mission 3", nullptr));
+        mission_4->setText(QApplication::translate("BluetoothGUI", "Mission 4", nullptr));
+        mission_2->setText(QApplication::translate("BluetoothGUI", "Mission 2", nullptr));
         D->setText(QApplication::translate("BluetoothGUI", "D", nullptr));
         Q->setText(QApplication::translate("BluetoothGUI", "Q", nullptr));
         A->setText(QApplication::translate("BluetoothGUI", "A", nullptr));
         E->setText(QApplication::translate("BluetoothGUI", "E", nullptr));
         S->setText(QApplication::translate("BluetoothGUI", "S", nullptr));
         W->setText(QApplication::translate("BluetoothGUI", "W", nullptr));
-        search->setText(QApplication::translate("BluetoothGUI", "Search for device", nullptr));
-        connect->setText(QApplication::translate("BluetoothGUI", "Connect", nullptr));
-        connected_to->setText(QApplication::translate("BluetoothGUI", "Connected to:", nullptr));
-        connected_device->setText(QString());
-        mission_1->setText(QApplication::translate("BluetoothGUI", "Draw position", nullptr));
-        mission_3->setText(QApplication::translate("BluetoothGUI", "Mission 3", nullptr));
-        mission_4->setText(QApplication::translate("BluetoothGUI", "Mission 4", nullptr));
-        mission_2->setText(QApplication::translate("BluetoothGUI", "Mission 2", nullptr));
         label_4->setText(QApplication::translate("BluetoothGUI", "Scale (1 meter is equal to # pixels):", nullptr));
         scale->setText(QString());
+        search->setText(QApplication::translate("BluetoothGUI", "Search for device", nullptr));
+        connect->setText(QApplication::translate("BluetoothGUI", "Connect", nullptr));
+        disconnect->setText(QApplication::translate("BluetoothGUI", "Disconnect", nullptr));
+        connected_to->setText(QApplication::translate("BluetoothGUI", "Connected to:", nullptr));
+        connected_device->setText(QString());
+        label_1->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
+        label_3->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
+        label_2->setText(QApplication::translate("BluetoothGUI", "TextLabel", nullptr));
+        send_command->setText(QApplication::translate("BluetoothGUI", "Send", nullptr));
         menuMap->setTitle(QApplication::translate("BluetoothGUI", "Map", nullptr));
     } // retranslateUi
 

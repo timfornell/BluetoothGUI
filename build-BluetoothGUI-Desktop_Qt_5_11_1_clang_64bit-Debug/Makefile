@@ -217,6 +217,7 @@ DIST          = ../../../Qt/5.11.1/clang_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/spec_post.prf \
+		../Source/.qmake.stash \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/toolchain.prf \
@@ -425,6 +426,7 @@ Makefile: ../Source/BluetoothGUI.pro ../../../Qt/5.11.1/clang_64/mkspecs/macx-cl
 		../../../Qt/5.11.1/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.11.1/clang_64/mkspecs/features/toolchain.prf \
@@ -618,6 +620,7 @@ Makefile: ../Source/BluetoothGUI.pro ../../../Qt/5.11.1/clang_64/mkspecs/macx-cl
 ../../../Qt/5.11.1/clang_64/mkspecs/features/qt_config.prf:
 ../../../Qt/5.11.1/clang_64/mkspecs/macx-clang/qmake.conf:
 ../../../Qt/5.11.1/clang_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../Qt/5.11.1/clang_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt/5.11.1/clang_64/mkspecs/features/mac/sdk.prf:
 ../../../Qt/5.11.1/clang_64/mkspecs/features/toolchain.prf:
@@ -692,6 +695,7 @@ clean: compiler_clean
 
 distclean: clean 
 	-$(DEL_FILE) -r BluetoothGUI2.app
+	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile
 
 
@@ -746,11 +750,21 @@ moc_bluetoothgui.cpp: ../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Header
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qlowenergyservicedata.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qtbluetoothversion.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/QBluetoothLocalDevice \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFile \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
 		../Source/painter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPainter \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qpainter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPaintEvent \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qevent.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QTextStream \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qtextstream.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QDebug \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qdebug.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFileSystemWatcher \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfilesystemwatcher.h \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qwidget.h \
 		../Source/bluetoothgui.h \
 		moc_predefs.h \
 		../../../Qt/5.11.1/clang_64/bin/moc
@@ -810,11 +824,21 @@ main.o: ../Source/main.cpp ../Source/bluetoothgui.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qlowenergyservicedata.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qtbluetoothversion.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/QBluetoothLocalDevice \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFile \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
 		../Source/painter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPainter \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qpainter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPaintEvent \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qevent.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QTextStream \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qtextstream.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QDebug \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qdebug.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFileSystemWatcher \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfilesystemwatcher.h \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qwidget.h \
 		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QApplication \
 		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Source/main.cpp
@@ -850,21 +874,45 @@ bluetoothgui.o: ../Source/bluetoothgui.cpp ../Source/bluetoothgui.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qlowenergyservicedata.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/qtbluetoothversion.h \
 		../../../Qt/5.11.1/clang_64/lib/QtBluetooth.framework/Headers/QBluetoothLocalDevice \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFile \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
 		../Source/painter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPainter \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qpainter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPaintEvent \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qevent.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QTextStream \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qtextstream.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QDebug \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qdebug.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFileSystemWatcher \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfilesystemwatcher.h \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qwidget.h \
 		ui_bluetoothgui.h \
 		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QTimer \
 		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qtimer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o bluetoothgui.o ../Source/bluetoothgui.cpp
 
-painter.o: ../Source/painter.cpp ../Source/painter.h \
+painter.o: ../Source/painter.cpp ../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QApplication \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qapplication.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFileSystemWatcher \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfilesystemwatcher.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QDebug \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qdebug.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QtMath \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qmath.h \
+		../Source/painter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPainter \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qpainter.h \
 		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/QPaintEvent \
-		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qevent.h
+		../../../Qt/5.11.1/clang_64/lib/QtGui.framework/Headers/qevent.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QFile \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/QTextStream \
+		../../../Qt/5.11.1/clang_64/lib/QtCore.framework/Headers/qtextstream.h \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/5.11.1/clang_64/lib/QtWidgets.framework/Headers/qwidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o painter.o ../Source/painter.cpp
 
 moc_bluetoothgui.o: moc_bluetoothgui.cpp 
