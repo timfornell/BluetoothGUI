@@ -89,50 +89,54 @@ BluetoothGUI::~BluetoothGUI()
  * */
 void BluetoothGUI::keyPressEvent(QKeyEvent *event){
     // If mainwindow has focus
-    qDebug() << "Key pressed: " << event->key();
+    //qDebug() << "Key pressed: " << event->key();
     if(ui->centralWidget->hasFocus()){
-        qDebug() << "Mainwindow has focus";
+        //qDebug() << "Mainwindow has focus";
         switch(event->key()){
         case Qt::Key_W:
         {
-            if(robot_direction != "W" && robot_direction != "S" &&
-                    robot_direction != "D" && robot_direction != "A"){
+            if(robot_direction != "W"){
                 robot_direction = "W";
+                buttons_pressed.append(Qt::Key_W);
                 QString command("W");
                 sendToDevice(command);
+                qDebug() << "Robot direction: " << robot_direction;
             }
 
             break;
         }
         case Qt::Key_D:
         {
-            if(robot_direction != "W" && robot_direction != "S" &&
-                    robot_direction != "D" && robot_direction != "A"){
+            if(robot_direction != "D"){
                 robot_direction = "D";
+                buttons_pressed.append(Qt::Key_D);
                 QString command("D");
                 sendToDevice(command);
+                qDebug() << "Robot direction: " << robot_direction;
             }
 
             break;
         }
         case Qt::Key_A:
         {
-            if(robot_direction != "W" && robot_direction != "S" &&
-                    robot_direction != "D" && robot_direction != "A"){
+            if(robot_direction != "A"){
                 robot_direction = "A";
+                buttons_pressed.append(Qt::Key_A);
                 QString command("A");
                 sendToDevice(command);
+                qDebug() << "Robot direction: " << robot_direction;
             }
 
             break;
         }
         case Qt::Key_S:
         {
-            if(robot_direction != "W" && robot_direction != "S" &&
-                    robot_direction != "D" && robot_direction != "A"){
+            if(robot_direction != "S"){
                 robot_direction = "S";
+                buttons_pressed.append(Qt::Key_S);
                 QString command("S");
                 sendToDevice(command);
+                qDebug() << "Robot direction: " << robot_direction;
             }
 
             break;
@@ -149,18 +153,87 @@ void BluetoothGUI::keyPressEvent(QKeyEvent *event){
  * */
 void BluetoothGUI::keyReleaseEvent(QKeyEvent *event){
     int key =  event->key();
-    qDebug() << "Key released: " << key;
     if(ui->centralWidget->hasFocus()){
-        if((key == Qt::Key_W || key == Qt::Key_A || key == Qt::Key_S || key == Qt::Key_D) && robot_direction != "still"){
-            robot_direction = "still";
-            QString command("STOP");
-            sendToDevice(command);
+        QString command;
+        bool direction_changed = false;
+
+        if((key == Qt::Key_W || key == Qt::Key_A || key == Qt::Key_S || key == Qt::Key_D)
+                && robot_direction != "still"){
+            // The buttons must have been pressed previously -> remove it from buttons_pressed
+            removePressedButton(key);
+
+            if(!buttons_pressed.isEmpty()){
+                // Send the last pressed button as command
+                key = buttons_pressed.last();
+                switch(key){
+                case Qt::Key_W:{
+                    qDebug() << "W is the last button";
+                    if(robot_direction != "W"){
+                        command = "W";
+                        robot_direction = "W";
+                        direction_changed = true;
+                    }
+                    break;
+                }
+                case Qt::Key_A:{
+                    qDebug() << "A is the last button";
+                    if(robot_direction != "A"){
+                        command = "A";
+                        robot_direction = "A";
+                        direction_changed = true;
+                    }
+                    break;
+                }
+                case Qt::Key_S:{
+                    qDebug() << "S is the last button";
+                    if(robot_direction != "S"){
+                        command = "S";
+                        robot_direction = "S";
+                        direction_changed = true;
+                    }
+                    break;
+                }
+                case Qt::Key_D:{
+                    qDebug() << "D is the last button";
+                    if(robot_direction != "D"){
+                        command = "D";
+                        robot_direction = "D";
+                        direction_changed = true;
+                    }
+                    break;
+                }
+                default:
+                    // Should not be here
+                    break;
+                }
+            }else{
+                command = "STOP";
+                robot_direction = "still";
+                direction_changed = true;
+            }
+
+            if(direction_changed){
+                sendToDevice(command);
+            }
         }
     }else if(ui->command_line->hasFocus()){
         qDebug() << "Command line has focus";
         if(key == Qt::Key_Return){
             // Send the command
             sendCommand();
+        }
+    }
+}
+
+/*
+ * Removes key from list of previously pressed keys
+ * */
+void BluetoothGUI::removePressedButton(int key){
+    qDebug() << "Remove button";
+    for(int i = 0; i < buttons_pressed.size(); i++){
+        // Only one instance of each button can be present, find it and remove it
+        if(buttons_pressed.at(i) == key){
+            buttons_pressed.removeAt(i);
         }
     }
 }
@@ -326,6 +399,9 @@ void BluetoothGUI::sendCommand(){
 void BluetoothGUI::sendToDevice(QString &string){
     if(connectedToDevice){
         QList<QLowEnergyCharacteristic> c = service->characteristics();
+
+        string.push_front('[');
+        string.push_back(']');
 
         QByteArray byte_string = string.toLocal8Bit();
 

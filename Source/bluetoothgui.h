@@ -31,6 +31,7 @@ public:
     void addDeviceNamesToList();
     void setScaleText();
     void sendToDevice(QString &string);
+    void removePressedButton(int key);
 
     // Override functions
     void paintEvent(QPaintEvent *event) override;
@@ -92,6 +93,7 @@ private:
     bool connectedToDevice;
 
     QString robot_direction;
+    QList<Qt::Key> buttons_pressed;
 
     //    QList<QBluetoothAddress> nearbyDevices;
     //    // Connected devices
