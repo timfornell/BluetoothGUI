@@ -33,6 +33,9 @@ public:
     void sendToDevice(QString &string);
     void removePressedButton(int key);
 
+    // Functions regarding the kalman filter
+    void writeToFile(QString filename, QByteArray &data);
+
     // Override functions
     void paintEvent(QPaintEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
@@ -78,6 +81,8 @@ private:
     int timeout;
 
     QString path;
+    QString meas_path;
+    bool new_session;
 
     // Host info
     QBluetoothLocalDevice *localDevice;

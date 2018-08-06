@@ -27,8 +27,10 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     translation.setX(0);
     translation.setY(0);
     draw_position = false;
-    path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt";
+    meas_path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/measurements.txt"; // File containing received measurements
+    path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt"; // File containing estimates produced by KF
     brush.setPath(path);
+    new_session = true;
 
     // Bluetooth vairables
     timeout = 2000;
@@ -448,6 +450,14 @@ void BluetoothGUI::startScan()
  */
 void BluetoothGUI::startDeviceDiscovery()
 {
+    if(connectedToDevice){
+        // Disconnect device before searching
+        LEcontroller->disconnectFromDevice();
+    }
+
+    // Clear list of devices
+    ui->devices->clear();
+
     // Clear list of nearby devices
     nearbyDevices.clear();
 
@@ -478,11 +488,17 @@ void BluetoothGUI::newDeviceDiscovered(const QBluetoothDeviceInfo &device)
         bool new_device = true;
         // Somehow several detections can be made of the same device.
         // Therefore check to se if a device with the same name is present in the list already.
-        for(int i = 0; i < nearbyDevices.size(); i++){
-            if(device.name() == nearbyDevices.at(i).name()){
-                new_device = false;
+        if(device.name() == ""){
+            // Don't want devices without names
+            new_device = false;
+        }else{
+            for(int i = 0; i < nearbyDevices.size(); i++){
+                if(device.name() == nearbyDevices.at(i).name()){
+                    new_device = false;
+                }
             }
         }
+
 
         if(new_device){
             nearbyDevices.append(device);
@@ -526,37 +542,39 @@ void BluetoothGUI::addDeviceNamesToList()
  * */
 void BluetoothGUI::connectToDevice()
 {
-    int index = ui->devices->currentIndex();
-    qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
+    if(ui->devices->count() > 0){
+        int index = ui->devices->currentIndex();
+        qDebug() << "Connecting to device: " << nearbyDevices.at(index).name() << " ...";
 
-    // Find address of selected device
-    connectedDevice = nearbyDevices.at(index);
+        // Find address of selected device
+        connectedDevice = nearbyDevices.at(index);
 
-    // Create LE controller
-    LEcontroller = QLowEnergyController::createCentral(connectedDevice, this);
+        // Create LE controller
+        LEcontroller = QLowEnergyController::createCentral(connectedDevice, this);
 
-    connect(LEcontroller, &QLowEnergyController::serviceDiscovered,
-            this, &BluetoothGUI::serviceDiscovered);
-    connect(LEcontroller, &QLowEnergyController::discoveryFinished,
-            this, &BluetoothGUI::serviceScanDone);
-    connect(LEcontroller, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
-            this, [this](QLowEnergyController::Error error) {
-        Q_UNUSED(error);
-        qDebug() << "Cannot connect to remote device.";
-    });
-    connect(LEcontroller, &QLowEnergyController::connected, this, [this]() {
-        qDebug() << "Controller connected. Search services...";
-        LEcontroller->discoverServices();
-    });
-    connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
-        qDebug() << "LowEnergy controller disconnected";
-    });
+        connect(LEcontroller, &QLowEnergyController::serviceDiscovered,
+                this, &BluetoothGUI::serviceDiscovered);
+        connect(LEcontroller, &QLowEnergyController::discoveryFinished,
+                this, &BluetoothGUI::serviceScanDone);
+        connect(LEcontroller, static_cast<void (QLowEnergyController::*)(QLowEnergyController::Error)>(&QLowEnergyController::error),
+                this, [this](QLowEnergyController::Error error) {
+            Q_UNUSED(error);
+            qDebug() << "Cannot connect to remote device.";
+        });
+        connect(LEcontroller, &QLowEnergyController::connected, this, [this]() {
+            qDebug() << "Controller connected. Search services...";
+            LEcontroller->discoverServices();
+        });
+        connect(LEcontroller, &QLowEnergyController::disconnected, this, [this]() {
+            qDebug() << "LowEnergy controller disconnected";
+        });
 
-    connect(LEcontroller, SIGNAL(disconnected()), this, SLOT(lostConnection()));
-    connect(LEcontroller, SIGNAL(connected()), this, SLOT(newConnection()));
+        connect(LEcontroller, SIGNAL(disconnected()), this, SLOT(lostConnection()));
+        connect(LEcontroller, SIGNAL(connected()), this, SLOT(newConnection()));
 
-    // Connect
-    LEcontroller->connectToDevice();
+        // Connect
+        LEcontroller->connectToDevice();
+    }
 }
 
 /*
@@ -615,6 +633,11 @@ void BluetoothGUI::serviceStateChanged(QLowEnergyService::ServiceState s){
         // When a characteristic has been found the connection is done
         if(!connectedToDevice){
             connectedToDevice = true;
+            // Notify that a new session has been started
+            new_session = true;
+            // Send confirmation to the robot
+            QString connection_ok("CONN_OK");
+            sendToDevice(connection_ok);
         }
 
         break;
@@ -639,8 +662,18 @@ void BluetoothGUI::serviceError(QLowEnergyService::ServiceError newError){
 void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteArray &newValue){
     if(connectedToDevice){
         qDebug() << "Notification received";
-        //    service->readCharacteristic(c);
-        qDebug() << "Value: " << c.value();
+
+        QByteArray data = c.value();
+
+        writeToFile(QString("measurements"), data);
+
+        //        QList<QByteArray> values = c.value().split(' ');
+        //        for(int i = 0; i < values.size(); i++){
+        //            qDebug() << i << ": " << values[i];
+        //        }
+        // Tell connected device that data was received successfully
+        QString data_ok("DATA_OK");
+        sendToDevice(data_ok);
     }
 }
 
@@ -652,8 +685,13 @@ void BluetoothGUI::serviceScanDone(){
  * Disconnect from connected device
  * */
 void BluetoothGUI::disconnectDevice(){
-    qDebug() << "Disconnecting" << connectedDevice.name();
-    LEcontroller->disconnectFromDevice();
+    if(connectedToDevice){
+        qDebug() << "Disconnecting" << connectedDevice.name();
+        // Tell connected device that the user is disconnecting
+        QString string("CONN_BREAK");
+        sendToDevice(string);
+        LEcontroller->disconnectFromDevice();
+    }
 }
 
 /*
@@ -675,4 +713,43 @@ void BluetoothGUI::newConnection()
     ui->connected_device->setText(connectedDevice.name());
 }
 
+/*****************************************************************
+ * Functions regarding kalman filter
+ *
+ * **************************************************************/
+
+void BluetoothGUI::writeToFile(QString filename, QByteArray &data){
+    QFile file;
+
+    // Write to measurements.txt
+    if(filename == "measurements"){
+        file.setFileName(meas_path);
+    }else if(filename == "estimates"){ // Write to output_file.txt
+        file.setFileName(path);
+    }
+
+    bool file_open;
+    // Check if new session
+    if(new_session){
+        // open file with truncation
+        qDebug() << "New session -> truncate";
+        file_open = file.open(QIODevice::ReadWrite | QIODevice::Text
+                              | QIODevice::Truncate);
+        new_session = false;
+    }else{
+        // Open file with append
+        file_open = file.open(QIODevice::ReadWrite | QIODevice::Text
+                              | QIODevice::Append);
+    }
+
+    // If it failed to open
+    if(!file_open){
+        qDebug() << "Could not open file";
+        return;
+    }
+
+    QTextStream out(&file);
+    out << data << endl;
+    file.close();
+}
 
