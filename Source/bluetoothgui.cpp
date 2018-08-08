@@ -9,6 +9,10 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Initialise ekf
+    qDebug() << "Initialize EKF";
+    ekf = KalmanFilter("CA", "accel", 2, 10, 10);
+
     // Can only change focus with mouse clicks
     setFocusPolicy(Qt::ClickFocus);
     // Allow graphical widget to accept focus by mouseclick
@@ -753,3 +757,7 @@ void BluetoothGUI::writeToFile(QString filename, QByteArray &data){
     file.close();
 }
 
+void BluetoothGUI::runKalmanFilter(){
+    qDebug() << "Perform meas update";
+    ekf.measurementUpdate();
+}

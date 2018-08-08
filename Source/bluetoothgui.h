@@ -9,6 +9,7 @@
 //#include <QWidget>
 
 #include "painter.h"
+#include "kalmanfilter.h"
 
 
 namespace Ui {
@@ -35,6 +36,7 @@ public:
 
     // Functions regarding the kalman filter
     void writeToFile(QString filename, QByteArray &data);
+    void runKalmanFilter();
 
     // Override functions
     void paintEvent(QPaintEvent *event) override;
@@ -69,6 +71,8 @@ public slots:
 
 private:
     Ui::BluetoothGUI *ui;
+
+    KalmanFilter ekf;
 
     // Variables for the openGLwidget
     Painter brush;
