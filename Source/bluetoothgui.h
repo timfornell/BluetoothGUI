@@ -36,7 +36,6 @@ public:
 
     // Functions regarding the kalman filter
     void writeToFile(QString filename, QByteArray &data);
-    void runKalmanFilter();
 
     // Override functions
     void paintEvent(QPaintEvent *event) override;
@@ -60,6 +59,9 @@ public slots:
     void newConnection();
     void resetZoom();
     void resetTranslation();
+    void enableEKF(bool status);
+    void saveMeasurements(bool status);
+    void runKalmanFilter();
     void drawEstimatedPositions(bool checked);
     void serviceStateChanged(QLowEnergyService::ServiceState s);
     void readSuccessfull(const QLowEnergyCharacteristic &c, const QByteArray &value);
@@ -73,6 +75,8 @@ private:
     Ui::BluetoothGUI *ui;
 
     KalmanFilter ekf;
+    bool ekf_enabled;
+    QTimer *ekf_timer;
 
     // Variables for the openGLwidget
     Painter brush;
@@ -85,8 +89,11 @@ private:
     int timeout;
 
     QString path;
+    QString est_path;
+    QString cov_path;
     QString meas_path;
     bool new_session;
+    bool save_measurements;
 
     // Host info
     QBluetoothLocalDevice *localDevice;

@@ -27,8 +27,16 @@ void Painter::setOrigin(QSize origin){
     origin_y = origin.height()/2;
 }
 
-void Painter::setPath(QString output_path){
-    path = output_path;
+void Painter::setEstPath(QString path){
+    est_path = path;
+}
+
+void Painter::setCovPath(QString path){
+    cov_path = path;
+}
+
+void Painter::setStates(unsigned long states){
+    nstates = states;
 }
 
 int Painter::getImageScale(){
@@ -38,7 +46,7 @@ int Painter::getImageScale(){
 void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, double scale, QPoint translation, bool draw_position)
 {
     // image_scale is how many pixels equal 1 meter and scale is the zoom
-//    double drawing_scale = scale*image_scale;
+    //    double drawing_scale = scale*image_scale;
 
     painter->fillRect(event->rect(), background);
     painter->translate(origin_x - translation.x(), origin_y - translation.y());
@@ -61,34 +69,48 @@ bool Painter::drawPositions(QPainter *painter, double scale)
     float small_circle = 1;
     double drawing_scale = scale*image_scale;
 
-    // Open file
-    QFile file(path);
-    qDebug() << path;
+    // Open files
+    QFile est_file(est_path);
+    QFile cov_file(cov_path);
 
     // If it failed to open
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!est_file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
-    QTextStream in(&file);
+    if (!cov_file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream est_in(&est_file);
+    QTextStream cov_in(&cov_file);
+
     // Read from file, one line at a time
-    while(!in.atEnd()){
-        QString line = in.readLine();
-        qDebug() << "Read from file: " << line;
+    QString est_line;
+
+    while(est_in.readLineInto(&est_line)){
+
+        qDebug() << "Estimates read from file: " << est_line;
 
         // Numbers are separated by spaces, split them up
-        QStringList numbers = line.split(" ");
+        QStringList estimates = est_line.split(" ");
 
-        if(numbers.size() != nstates+nstates*nstates){
-            qDebug() << "What was read from the file is in incorrect format!";
-            continue;
+        double x = estimates.at(0).toDouble();
+        double y = estimates.at(1).toDouble();
+        double Pxx, Pxy, Pyx, Pyy;
+
+        QString cov_line;
+        for(unsigned long i = 0; i < nstates; i++){
+            if(cov_in.readLineInto(&cov_line)){
+                QStringList covariance = cov_line.split(" ");
+                qDebug() << "Covariance read from file: " << est_line;
+                if(i == 0){
+                    Pxx = covariance.at(i).toDouble();
+                    Pxy = covariance.at(i+1).toDouble();
+                }else if(i == 1){
+                    Pyx = covariance.at(i-1).toDouble();
+                    Pyy = covariance.at(i).toDouble();
+                }
+            }
         }
-        float x = numbers.at(0).toFloat();
-        float y = numbers.at(1).toFloat();
-        qDebug() << "x: " << x << "y: " << y;
-        float P11 = numbers.at(2).toFloat();
-        float P12 = numbers.at(3).toFloat();
-        float P21 = numbers.at(4).toFloat();
-        float P22 = numbers.at(5).toFloat();
 
         painter->setBrush(Qt::red);
         // Draw circle for position
@@ -98,8 +120,8 @@ bool Painter::drawPositions(QPainter *painter, double scale)
         painter->drawEllipse(pos);
 
         // Draw circle for uncertainty
-        QRect P = QRect(drawing_scale*(x-2*qSqrt(P11)/2), -drawing_scale*(y+2*qSqrt(P22)/2)
-                        , 2*drawing_scale*qSqrt(P11), 2*drawing_scale*qSqrt(P22));
+        QRect P = QRect(drawing_scale*(x-2*qSqrt(Pxx)/2), -drawing_scale*(y+2*qSqrt(Pyy)/2)
+                        , 2*drawing_scale*qSqrt(Pxx), 2*drawing_scale*qSqrt(Pyy));
         qDebug() << "P.x; " << P.x() << "P.y: " << P.y() << "P width: " << P.width() << "P height: " << P.height();
 
         painter->setBrush(QColor(0,0,255, 0));

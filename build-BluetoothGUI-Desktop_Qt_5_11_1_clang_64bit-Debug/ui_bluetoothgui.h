@@ -42,10 +42,10 @@ public:
     QPushButton *stop;
     QPushButton *start;
     QGridLayout *Missions;
-    QCheckBox *mission_1;
-    QCheckBox *mission_3;
-    QCheckBox *mission_4;
-    QCheckBox *mission_2;
+    QCheckBox *draw_positions;
+    QCheckBox *save_meas;
+    QCheckBox *checkBox_2;
+    QCheckBox *enable_ekf;
     QGridLayout *Manual_controls;
     QPushButton *D;
     QPushButton *Q;
@@ -117,25 +117,25 @@ public:
         Missions = new QGridLayout();
         Missions->setSpacing(6);
         Missions->setObjectName(QStringLiteral("Missions"));
-        mission_1 = new QCheckBox(centralWidget);
-        mission_1->setObjectName(QStringLiteral("mission_1"));
+        draw_positions = new QCheckBox(centralWidget);
+        draw_positions->setObjectName(QStringLiteral("draw_positions"));
 
-        Missions->addWidget(mission_1, 0, 0, 1, 1);
+        Missions->addWidget(draw_positions, 0, 0, 1, 1);
 
-        mission_3 = new QCheckBox(centralWidget);
-        mission_3->setObjectName(QStringLiteral("mission_3"));
+        save_meas = new QCheckBox(centralWidget);
+        save_meas->setObjectName(QStringLiteral("save_meas"));
 
-        Missions->addWidget(mission_3, 1, 0, 1, 1);
+        Missions->addWidget(save_meas, 1, 0, 1, 1);
 
-        mission_4 = new QCheckBox(centralWidget);
-        mission_4->setObjectName(QStringLiteral("mission_4"));
+        checkBox_2 = new QCheckBox(centralWidget);
+        checkBox_2->setObjectName(QStringLiteral("checkBox_2"));
 
-        Missions->addWidget(mission_4, 1, 1, 1, 1);
+        Missions->addWidget(checkBox_2, 1, 1, 1, 1);
 
-        mission_2 = new QCheckBox(centralWidget);
-        mission_2->setObjectName(QStringLiteral("mission_2"));
+        enable_ekf = new QCheckBox(centralWidget);
+        enable_ekf->setObjectName(QStringLiteral("enable_ekf"));
 
-        Missions->addWidget(mission_2, 0, 1, 1, 1);
+        Missions->addWidget(enable_ekf, 0, 1, 1, 1);
 
 
         gridLayout_7->addLayout(Missions, 4, 0, 1, 1);
@@ -346,10 +346,10 @@ public:
         actionReset_zoom->setText(QApplication::translate("BluetoothGUI", "Reset zoom", nullptr));
         stop->setText(QApplication::translate("BluetoothGUI", "Stop", nullptr));
         start->setText(QApplication::translate("BluetoothGUI", "Start", nullptr));
-        mission_1->setText(QApplication::translate("BluetoothGUI", "Draw position", nullptr));
-        mission_3->setText(QApplication::translate("BluetoothGUI", "Mission 3", nullptr));
-        mission_4->setText(QApplication::translate("BluetoothGUI", "Mission 4", nullptr));
-        mission_2->setText(QApplication::translate("BluetoothGUI", "Mission 2", nullptr));
+        draw_positions->setText(QApplication::translate("BluetoothGUI", "Draw position", nullptr));
+        save_meas->setText(QApplication::translate("BluetoothGUI", "Save Measurements", nullptr));
+        checkBox_2->setText(QApplication::translate("BluetoothGUI", "Mission 4", nullptr));
+        enable_ekf->setText(QApplication::translate("BluetoothGUI", "Enable EKF", nullptr));
         D->setText(QApplication::translate("BluetoothGUI", "D", nullptr));
         Q->setText(QApplication::translate("BluetoothGUI", "Q", nullptr));
         A->setText(QApplication::translate("BluetoothGUI", "A", nullptr));

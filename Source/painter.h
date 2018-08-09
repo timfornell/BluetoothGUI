@@ -19,8 +19,10 @@ public:
                double scale, QPoint translation, bool draw_position);
     bool drawPositions(QPainter *painter, double scale);
     void setOrigin(QSize origin);
-    void setPath(QString output_path);
+    void setEstPath(QString path);
+    void setCovPath(QString path);
     int getImageScale();
+    void setStates(unsigned long states);
 
 public slots:
     void resetZoom();
@@ -37,8 +39,9 @@ private:
     int origin_x;
     int origin_y;
     int image_scale;
-    QString path;
-    int nstates;
+    QString est_path;
+    QString cov_path;
+    unsigned long nstates;
     QPoint image_translation;
 
 };

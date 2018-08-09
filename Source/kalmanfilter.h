@@ -15,15 +15,17 @@ public:
     ~KalmanFilter() = default;
 
     void initialiseEstimates(double Q);
-    void measurementUpdate();
-    void timeUpdate();
+    void runFilter();
 
     void setMeasPath(QString path);
     void setEstPath(QString path);
     void setCovPath(QString path);
 
+    unsigned long getStates();
+
     void writeEstimate(QTextStream &out);
     void writeCovariance(QTextStream &out);
+    void resetFilter();
 
 private:
     // States and covmat for time k
@@ -37,7 +39,7 @@ private:
     // Hessians for sensor and motion model
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H;
-    Eigen::Matrix<double, Eigen::Dynamic, 1> Rk;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Rk;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Qk;
 
     unsigned long states; // Initialising vectors with signed int is not appreciated

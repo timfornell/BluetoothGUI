@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_BluetoothGUI_t {
-    QByteArrayData data[36];
-    char stringdata0[544];
+    QByteArrayData data[40];
+    char stringdata0[594];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -51,22 +51,26 @@ QT_MOC_LITERAL(16, 232, 14), // "lostConnection"
 QT_MOC_LITERAL(17, 247, 13), // "newConnection"
 QT_MOC_LITERAL(18, 261, 9), // "resetZoom"
 QT_MOC_LITERAL(19, 271, 16), // "resetTranslation"
-QT_MOC_LITERAL(20, 288, 22), // "drawEstimatedPositions"
-QT_MOC_LITERAL(21, 311, 7), // "checked"
-QT_MOC_LITERAL(22, 319, 19), // "serviceStateChanged"
-QT_MOC_LITERAL(23, 339, 31), // "QLowEnergyService::ServiceState"
-QT_MOC_LITERAL(24, 371, 1), // "s"
-QT_MOC_LITERAL(25, 373, 15), // "readSuccessfull"
-QT_MOC_LITERAL(26, 389, 24), // "QLowEnergyCharacteristic"
-QT_MOC_LITERAL(27, 414, 1), // "c"
-QT_MOC_LITERAL(28, 416, 5), // "value"
-QT_MOC_LITERAL(29, 422, 12), // "notification"
-QT_MOC_LITERAL(30, 435, 8), // "newValue"
-QT_MOC_LITERAL(31, 444, 11), // "sendCommand"
-QT_MOC_LITERAL(32, 456, 33), // "characteristicWrittenSuccessf..."
-QT_MOC_LITERAL(33, 490, 12), // "serviceError"
-QT_MOC_LITERAL(34, 503, 31), // "QLowEnergyService::ServiceError"
-QT_MOC_LITERAL(35, 535, 8) // "newError"
+QT_MOC_LITERAL(20, 288, 9), // "enableEKF"
+QT_MOC_LITERAL(21, 298, 6), // "status"
+QT_MOC_LITERAL(22, 305, 16), // "saveMeasurements"
+QT_MOC_LITERAL(23, 322, 15), // "runKalmanFilter"
+QT_MOC_LITERAL(24, 338, 22), // "drawEstimatedPositions"
+QT_MOC_LITERAL(25, 361, 7), // "checked"
+QT_MOC_LITERAL(26, 369, 19), // "serviceStateChanged"
+QT_MOC_LITERAL(27, 389, 31), // "QLowEnergyService::ServiceState"
+QT_MOC_LITERAL(28, 421, 1), // "s"
+QT_MOC_LITERAL(29, 423, 15), // "readSuccessfull"
+QT_MOC_LITERAL(30, 439, 24), // "QLowEnergyCharacteristic"
+QT_MOC_LITERAL(31, 464, 1), // "c"
+QT_MOC_LITERAL(32, 466, 5), // "value"
+QT_MOC_LITERAL(33, 472, 12), // "notification"
+QT_MOC_LITERAL(34, 485, 8), // "newValue"
+QT_MOC_LITERAL(35, 494, 11), // "sendCommand"
+QT_MOC_LITERAL(36, 506, 33), // "characteristicWrittenSuccessf..."
+QT_MOC_LITERAL(37, 540, 12), // "serviceError"
+QT_MOC_LITERAL(38, 553, 31), // "QLowEnergyService::ServiceError"
+QT_MOC_LITERAL(39, 585, 8) // "newError"
 
     },
     "BluetoothGUI\0newDeviceDiscovered\0\0"
@@ -77,9 +81,11 @@ QT_MOC_LITERAL(35, 535, 8) // "newError"
     "newService\0serviceScanDone\0connectToDevice\0"
     "disconnectDevice\0lostConnection\0"
     "newConnection\0resetZoom\0resetTranslation\0"
-    "drawEstimatedPositions\0checked\0"
-    "serviceStateChanged\0QLowEnergyService::ServiceState\0"
-    "s\0readSuccessfull\0QLowEnergyCharacteristic\0"
+    "enableEKF\0status\0saveMeasurements\0"
+    "runKalmanFilter\0drawEstimatedPositions\0"
+    "checked\0serviceStateChanged\0"
+    "QLowEnergyService::ServiceState\0s\0"
+    "readSuccessfull\0QLowEnergyCharacteristic\0"
     "c\0value\0notification\0newValue\0sendCommand\0"
     "characteristicWrittenSuccessfully\0"
     "serviceError\0QLowEnergyService::ServiceError\0"
@@ -93,7 +99,7 @@ static const uint qt_meta_data_BluetoothGUI[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      19,   14, // methods
+      22,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -101,25 +107,28 @@ static const uint qt_meta_data_BluetoothGUI[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,  109,    2, 0x0a /* Public */,
-       5,    0,  112,    2, 0x0a /* Public */,
-       6,    0,  113,    2, 0x0a /* Public */,
-       7,    1,  114,    2, 0x0a /* Public */,
-      10,    1,  117,    2, 0x0a /* Public */,
-      13,    0,  120,    2, 0x0a /* Public */,
-      14,    0,  121,    2, 0x0a /* Public */,
-      15,    0,  122,    2, 0x0a /* Public */,
-      16,    0,  123,    2, 0x0a /* Public */,
-      17,    0,  124,    2, 0x0a /* Public */,
-      18,    0,  125,    2, 0x0a /* Public */,
-      19,    0,  126,    2, 0x0a /* Public */,
-      20,    1,  127,    2, 0x0a /* Public */,
-      22,    1,  130,    2, 0x0a /* Public */,
-      25,    2,  133,    2, 0x0a /* Public */,
-      29,    2,  138,    2, 0x0a /* Public */,
-      31,    0,  143,    2, 0x0a /* Public */,
-      32,    2,  144,    2, 0x0a /* Public */,
-      33,    1,  149,    2, 0x0a /* Public */,
+       1,    1,  124,    2, 0x0a /* Public */,
+       5,    0,  127,    2, 0x0a /* Public */,
+       6,    0,  128,    2, 0x0a /* Public */,
+       7,    1,  129,    2, 0x0a /* Public */,
+      10,    1,  132,    2, 0x0a /* Public */,
+      13,    0,  135,    2, 0x0a /* Public */,
+      14,    0,  136,    2, 0x0a /* Public */,
+      15,    0,  137,    2, 0x0a /* Public */,
+      16,    0,  138,    2, 0x0a /* Public */,
+      17,    0,  139,    2, 0x0a /* Public */,
+      18,    0,  140,    2, 0x0a /* Public */,
+      19,    0,  141,    2, 0x0a /* Public */,
+      20,    1,  142,    2, 0x0a /* Public */,
+      22,    1,  145,    2, 0x0a /* Public */,
+      23,    0,  148,    2, 0x0a /* Public */,
+      24,    1,  149,    2, 0x0a /* Public */,
+      26,    1,  152,    2, 0x0a /* Public */,
+      29,    2,  155,    2, 0x0a /* Public */,
+      33,    2,  160,    2, 0x0a /* Public */,
+      35,    0,  165,    2, 0x0a /* Public */,
+      36,    2,  166,    2, 0x0a /* Public */,
+      37,    1,  171,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -135,12 +144,15 @@ static const uint qt_meta_data_BluetoothGUI[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Bool,   21,
-    QMetaType::Void, 0x80000000 | 23,   24,
-    QMetaType::Void, 0x80000000 | 26, QMetaType::QByteArray,   27,   28,
-    QMetaType::Void, 0x80000000 | 26, QMetaType::QByteArray,   27,   30,
+    QMetaType::Void, QMetaType::Bool,   21,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 26, QMetaType::QByteArray,   27,   30,
-    QMetaType::Void, 0x80000000 | 34,   35,
+    QMetaType::Void, QMetaType::Bool,   25,
+    QMetaType::Void, 0x80000000 | 27,   28,
+    QMetaType::Void, 0x80000000 | 30, QMetaType::QByteArray,   31,   32,
+    QMetaType::Void, 0x80000000 | 30, QMetaType::QByteArray,   31,   34,
+    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 30, QMetaType::QByteArray,   31,   34,
+    QMetaType::Void, 0x80000000 | 38,   39,
 
        0        // eod
 };
@@ -163,13 +175,16 @@ void BluetoothGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 9: _t->newConnection(); break;
         case 10: _t->resetZoom(); break;
         case 11: _t->resetTranslation(); break;
-        case 12: _t->drawEstimatedPositions((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 13: _t->serviceStateChanged((*reinterpret_cast< QLowEnergyService::ServiceState(*)>(_a[1]))); break;
-        case 14: _t->readSuccessfull((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
-        case 15: _t->notification((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
-        case 16: _t->sendCommand(); break;
-        case 17: _t->characteristicWrittenSuccessfully((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
-        case 18: _t->serviceError((*reinterpret_cast< QLowEnergyService::ServiceError(*)>(_a[1]))); break;
+        case 12: _t->enableEKF((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 13: _t->saveMeasurements((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 14: _t->runKalmanFilter(); break;
+        case 15: _t->drawEstimatedPositions((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 16: _t->serviceStateChanged((*reinterpret_cast< QLowEnergyService::ServiceState(*)>(_a[1]))); break;
+        case 17: _t->readSuccessfull((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
+        case 18: _t->notification((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
+        case 19: _t->sendCommand(); break;
+        case 20: _t->characteristicWrittenSuccessfully((*reinterpret_cast< const QLowEnergyCharacteristic(*)>(_a[1])),(*reinterpret_cast< const QByteArray(*)>(_a[2]))); break;
+        case 21: _t->serviceError((*reinterpret_cast< QLowEnergyService::ServiceError(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -189,25 +204,11 @@ void BluetoothGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QBluetoothUuid >(); break;
             }
             break;
-        case 13:
+        case 16:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QLowEnergyService::ServiceState >(); break;
-            }
-            break;
-        case 14:
-            switch (*reinterpret_cast<int*>(_a[1])) {
-            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-            case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QLowEnergyCharacteristic >(); break;
-            }
-            break;
-        case 15:
-            switch (*reinterpret_cast<int*>(_a[1])) {
-            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-            case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QLowEnergyCharacteristic >(); break;
             }
             break;
         case 17:
@@ -218,6 +219,20 @@ void BluetoothGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
             }
             break;
         case 18:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QLowEnergyCharacteristic >(); break;
+            }
+            break;
+        case 20:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QLowEnergyCharacteristic >(); break;
+            }
+            break;
+        case 21:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -253,13 +268,13 @@ int BluetoothGUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 19)
+        if (_id < 22)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 22;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 19)
+        if (_id < 22)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 22;
     }
     return _id;
 }

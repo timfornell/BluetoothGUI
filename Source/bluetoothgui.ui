@@ -48,30 +48,30 @@
     <item row="4" column="0">
      <layout class="QGridLayout" name="Missions">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="mission_1">
+       <widget class="QCheckBox" name="draw_positions">
         <property name="text">
          <string>Draw position</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="mission_3">
+       <widget class="QCheckBox" name="save_meas">
         <property name="text">
-         <string>Mission 3</string>
+         <string>Save Measurements</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="mission_4">
+       <widget class="QCheckBox" name="checkBox_2">
         <property name="text">
          <string>Mission 4</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="mission_2">
+       <widget class="QCheckBox" name="enable_ekf">
         <property name="text">
-         <string>Mission 2</string>
+         <string>Enable EKF</string>
         </property>
        </widget>
       </item>

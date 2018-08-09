@@ -9,10 +9,6 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Initialise ekf
-    qDebug() << "Initialize EKF";
-    ekf = KalmanFilter("CA", "accel", 2, 10, 10);
-
     // Can only change focus with mouse clicks
     setFocusPolicy(Qt::ClickFocus);
     // Allow graphical widget to accept focus by mouseclick
@@ -32,29 +28,51 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     translation.setY(0);
     draw_position = false;
     meas_path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/measurements.txt"; // File containing received measurements
+    est_path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/estimates.txt"; // File containing received measurements
+    cov_path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/covariaces.txt"; // File containing received measurements
     path = "/Users/timfornell/Documents/GitHub/BluetoothGUI/Source/output_file.txt"; // File containing estimates produced by KF
-    brush.setPath(path);
+    brush.setEstPath(est_path);
+    brush.setCovPath(cov_path);
     new_session = true;
+    save_measurements = false;
+
+    // Initialise ekf
+    qDebug() << "Initialize EKF";
+    ekf_enabled = false;
+    ekf = KalmanFilter("CA", "accel", 2, 10, 10);
+    // Set states in brush
+    brush.setStates(ekf.getStates());
+    ekf.setMeasPath(meas_path);
+    ekf.setEstPath(est_path);
+    ekf.setCovPath(cov_path);
+    // Time for EKF
+    ekf_timer = new QTimer(this);
+    connect(ekf_timer, SIGNAL(timeout()), this, SLOT(runKalmanFilter()));
+    ekf_timer->start(1000); // EKF runs at Ts = 2s
 
     // Bluetooth vairables
     timeout = 2000;
     robot_direction = "still";
 
     ui->connected_device->setText("None");
-    ui->mission_1->setCheckState(Qt::Unchecked);
+    ui->draw_positions->setCheckState(Qt::Unchecked);
+    ui->enable_ekf->setCheckState(Qt::Unchecked);
+    ui->save_meas->setCheckState(Qt::Unchecked);
 
     // Connect Signals to appropriate Slots
 
     // Connect map signals
     connect(ui->actionReset_translation, SIGNAL(triggered()), this, SLOT(resetTranslation()));
     connect(ui->actionReset_zoom, SIGNAL(triggered()), this, SLOT(resetZoom()));
-    connect(ui->mission_1, SIGNAL(toggled(bool)), this, SLOT(drawEstimatedPositions(bool)));
+    connect(ui->draw_positions, SIGNAL(toggled(bool)), this, SLOT(drawEstimatedPositions(bool)));
 
     // Connect buttons in GUI to appropriate functions
     connect(ui->search, SIGNAL(released()), this, SLOT(startScan()));
     connect(ui->connect, SIGNAL(released()), this, SLOT(connectToDevice()));
     connect(ui->send_command, SIGNAL(released()), this, SLOT(sendCommand()));
     connect(ui->disconnect, SIGNAL(released()), this, SLOT(disconnectDevice()));
+    connect(ui->enable_ekf, SIGNAL(toggled(bool)), this, SLOT(enableEKF(bool)));
+    connect(ui->save_meas, SIGNAL(toggled(bool)), this, SLOT(saveMeasurements(bool)));
 
     //     Check if Bluetooth is available on this device
     if (localDevice->isValid()) {
@@ -669,8 +687,10 @@ void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteAr
 
         QByteArray data = c.value();
 
-        writeToFile(QString("measurements"), data);
-
+        if(save_measurements){
+            qDebug() << "Write to file";
+            writeToFile(QString("measurements"), data);
+        }
         //        QList<QByteArray> values = c.value().split(' ');
         //        for(int i = 0; i < values.size(); i++){
         //            qDebug() << i << ": " << values[i];
@@ -680,6 +700,21 @@ void BluetoothGUI::notification(const QLowEnergyCharacteristic &c, const QByteAr
         sendToDevice(data_ok);
     }
 }
+
+/*
+ * Enable saving of measurements
+ * */
+void BluetoothGUI::saveMeasurements(bool status){
+    qDebug() << "Save measurements is: " << status;
+    if(status == true){
+        // All previously gathered data should be written over
+        new_session = true;
+        ekf.resetFilter();
+    }
+
+    save_measurements = status;
+}
+
 
 void BluetoothGUI::serviceScanDone(){
     qDebug() << "Service scan done.";
@@ -758,6 +793,12 @@ void BluetoothGUI::writeToFile(QString filename, QByteArray &data){
 }
 
 void BluetoothGUI::runKalmanFilter(){
-    qDebug() << "Perform meas update";
-    ekf.measurementUpdate();
+    if(ekf_enabled){
+        ekf.runFilter();
+    }
+}
+
+void BluetoothGUI::enableEKF(bool status){
+    qDebug() << "EKF status is:" << status;
+    ekf_enabled = status;
 }

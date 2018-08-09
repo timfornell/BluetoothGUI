@@ -55,8 +55,9 @@ KalmanFilter::KalmanFilter(QString motion_m, QString sensor_m, double T, double 
         }
 
         H = sens;
-        Eigen::Vector2d meas_noise;
-        meas_noise << R, R;
+        Eigen::MatrixXd meas_noise(nmeas, nmeas);
+        meas_noise << R, 0,
+                0, R;
         Rk = meas_noise;
     }
 
@@ -67,8 +68,8 @@ KalmanFilter::KalmanFilter(QString motion_m, QString sensor_m, double T, double 
 }
 
 void KalmanFilter::initialiseEstimates(double Q){
-//    std::vector<double> state_vector(states);
-//    std::vector<std::vector<double>> cov_mat(states, std::vector<double>(states));
+    //    std::vector<double> state_vector(states);
+    //    std::vector<std::vector<double>> cov_mat(states, std::vector<double>(states));
     Eigen::MatrixXd state_vector(states, 1);
     Eigen::MatrixXd cov_mat(states,states);
 
@@ -76,38 +77,38 @@ void KalmanFilter::initialiseEstimates(double Q){
         if(dim == 2){
             state_vector << 0, 0, 0, 0;
             cov_mat << 1, 0, 0, 0,
-                       0, 1, 0, 0,
-                       0, 0, 1, 0,
-                       0, 0, 0, 1;
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1;
         }else{
             state_vector << 0, 0, 0, 0, 0, 0;
             cov_mat << 1, 0, 0, 0, 0, 0,
-                       0, 1, 0, 0, 0, 0,
-                       0, 0, 1, 0, 0, 0,
-                       0, 0, 0, 1, 0, 0,
-                       0, 0, 0, 0, 1, 0,
-                       0, 0, 0, 0, 0, 1;
+                    0, 1, 0, 0, 0, 0,
+                    0, 0, 1, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0,
+                    0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 1;
         }
     }else if(motion_model == "CA"){
         if(dim == 2){
             state_vector << 0, 0, 0, 0, 0, 0;
             cov_mat << 1, 0, 0, 0, 0, 0,
-                       0, 1, 0, 0, 0, 0,
-                       0, 0, 1, 0, 0, 0,
-                       0, 0, 0, 1, 0, 0,
-                       0, 0, 0, 0, 10, 0,
-                       0, 0, 0, 0, 0, 10;
+                    0, 1, 0, 0, 0, 0,
+                    0, 0, 1, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0,
+                    0, 0, 0, 0, 10, 0,
+                    0, 0, 0, 0, 0, 10;
         }else{
             state_vector << 0, 0, 0, 0, 0, 0, 0, 0, 0;
             cov_mat << 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                       0, 1, 0, 0, 0, 0, 0, 0, 0,
-                       0, 0, 1, 0, 0, 0, 0, 0, 0,
-                       0, 0, 0, 1, 0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 1, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0, 1, 0, 0, 0,
-                       0, 0, 0, 0, 0, 0, 10, 0, 0,
-                       0, 0, 0, 0, 0, 0, 0, 10, 0,
-                       0, 0, 0, 0, 0, 0, 0, 0, 10;
+                    0, 1, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 1, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 10, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 10, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 10;
         }
     }
 
@@ -127,7 +128,7 @@ void KalmanFilter::initialiseEstimates(double Q){
 }
 
 // Börja felsök här
-void KalmanFilter::measurementUpdate(){
+void KalmanFilter::runFilter(){
     // Linear Kalman Filter
     if((motion_model == "CV" || motion_model == "CA") && sensor_model == "accel"){
         // Open measurement file
@@ -161,54 +162,65 @@ void KalmanFilter::measurementUpdate(){
         QTextStream est_out(&est_file);
         QTextStream cov_out(&cov_file);
 
-        while(!in.atEnd()){
-            // Read one line at a time
-            QString line = in.readLine();
-            qDebug() << "Read from file: " << line;
+        int line_counter = 0;
+        in.seek(0); // Place cursor at the start for some reason
+        QString line;
+//        while(!in.atEnd()){
+        while(in.readLineInto(&line)){
+            if(k == line_counter){
+                // Read one line at a time
+//                QString line = in.readLine();
+                qDebug() << "New data found in file: " << line;
 
-            QStringList measurements = line.split(" ");
+                QStringList measurements = line.split(" ");
 
-            // Create vector with measurements
-//            std::vector<double> meas(dim);
-            Eigen::MatrixXd meas(1,dim);
+                // Create vector with measurements
+                //            std::vector<double> meas(dim);
+                Eigen::MatrixXd meas(dim, 1); // nmeas
 
-            if(dim == 2){
-                double a_x = measurements.at(0).toDouble();
-                double a_y = measurements.at(1).toDouble();
+                if(dim == 2){
+                    double a_x = measurements.at(0).toDouble();
+                    double a_y = measurements.at(1).toDouble();
 
-                meas << a_x, a_y;
-            }else{
-                double a_x = measurements.at(0).toDouble();
-                double a_y = measurements.at(1).toDouble();
-                double a_z = measurements.at(2).toDouble();
+                    meas << a_x, a_y;
+                }else{
+                    double a_x = measurements.at(0).toDouble();
+                    double a_y = measurements.at(1).toDouble();
+                    double a_z = measurements.at(2).toDouble();
 
-                meas << a_x, a_y, a_z;
+                    meas << a_x, a_y, a_z;
+                }
+
+                // Calculate Sk
+                Eigen::MatrixXd Sk(nmeas, nmeas);
+                Sk << Rk + H*p_pred*(H.transpose());
+                // Kalman gain
+                Eigen::MatrixXd Kk(states, nmeas);
+                Kk << p_pred*H.transpose()*Sk.inverse();
+                // Error
+                Eigen::MatrixXd eps_k(nmeas,1);
+                eps_k << meas - H*x_pred;
+                // Update
+                xhat_k << x_pred + Kk*eps_k;
+                phat_k << p_pred - p_pred*H.transpose()*Sk.inverse()*H*p_pred;
+
+                k++;
+
+                // Write estimates and covariance matrix to files
+                writeEstimate(est_out);
+                writeCovariance(cov_out);
+
+                x_pred << F*xhat_k;
+                p_pred << F*phat_k*F.transpose() + Qk;
             }
 
-            // Calculate Sk
-            Eigen::MatrixXd Sk(nmeas, nmeas);
-            Sk = Rk + H*p_pred*H.transpose();
-            // Kalman gain
-            Eigen::MatrixXd Kk(states, nmeas);
-            Kk = p_pred*H.transpose()*Sk.inverse();
-            // Error
-            Eigen::MatrixXd eps_k(1, dim);
-            eps_k = meas - H*x_pred;
-            // Update
-            xhat_k = x_pred + Kk*eps_k;
-            phat_k = p_pred - p_pred*H.transpose()*Sk.inverse()*H*p_pred;
-
-            k++;
-
-            // Write estimates and covariance matrix to files
-            writeEstimate(est_out);
-            writeCovariance(cov_out);
+            line_counter++;
         }
+
+        meas_file.close();
+        est_file.close();
+        cov_file.close();
     }
-}
-
-void KalmanFilter::timeUpdate(){
-
 }
 
 void KalmanFilter::setCovPath(QString path){
@@ -223,6 +235,10 @@ void KalmanFilter::setEstPath(QString path){
     estimates_path = path;
 }
 
+unsigned long KalmanFilter::getStates(){
+    return states;
+}
+
 void KalmanFilter::writeEstimate(QTextStream &out){
     QString data;
     for(unsigned int i = 0; i < states; i++){
@@ -232,14 +248,20 @@ void KalmanFilter::writeEstimate(QTextStream &out){
 
     out << data << endl;
 }
+
 void KalmanFilter::writeCovariance(QTextStream &out){
     for(unsigned int j = 0; j < states; j++){
         QString data;
         for(unsigned int i = 0; i < states; i++){
-            double x = xhat_k(i,j);
-            data += QString::number(x) + " ";
+            double p_ij = phat_k(i,j);
+            data += QString::number(p_ij) + " ";
         }
 
         out << data << endl;
     }
+}
+
+void KalmanFilter::resetFilter(){
+    k = 0;
+    initialiseEstimates(Qk(1,1));
 }
