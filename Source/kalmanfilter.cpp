@@ -26,6 +26,14 @@ KalmanFilter::KalmanFilter(QString motion_m, QString sensor_m, double T, double 
 
         F = model;
 
+        Eigen::MatrixXd noise(states, dim);
+
+        noise << T*T/2, 0,
+                0, T*T/2,
+                T, 0,
+                0, T;
+
+        G = noise;
     }else if(motion_model == "CA"){
         // Constant acceleration model in 2 dimensions
         states = 3*dim;
@@ -42,6 +50,18 @@ KalmanFilter::KalmanFilter(QString motion_m, QString sensor_m, double T, double 
                 0, 0, 0, 0, 0, 0;
 
         F = model;
+
+        Eigen::MatrixXd noise(states, dim);
+
+        noise << Ts*Ts*Ts/6, 0,
+                0, Ts*Ts*Ts/6,
+                T*T/2, 0,
+                0, T*T/2,
+                T, 0,
+                0, T;
+
+        G = noise;
+
     }
 
     if(sensor_model == "accel"){
@@ -76,39 +96,39 @@ void KalmanFilter::initialiseEstimates(double Q){
     if(motion_model == "CV"){
         if(dim == 2){
             state_vector << 0, 0, 0, 0;
-            cov_mat << 1, 0, 0, 0,
-                    0, 1, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 0, 1;
+            cov_mat << 0.01, 0, 0, 0,
+                    0, 0.01, 0, 0,
+                    0, 0, 0.01, 0,
+                    0, 0, 0, 0.01;
         }else{
             state_vector << 0, 0, 0, 0, 0, 0;
-            cov_mat << 1, 0, 0, 0, 0, 0,
-                    0, 1, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 0,
-                    0, 0, 0, 1, 0, 0,
-                    0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 1;
+            cov_mat << 0.01, 0, 0, 0, 0, 0,
+                    0, 0.01, 0, 0, 0, 0,
+                    0, 0, 0.01, 0, 0, 0,
+                    0, 0, 0, 0.01, 0, 0,
+                    0, 0, 0, 0, 0.01, 0,
+                    0, 0, 0, 0, 0, 0.01;
         }
     }else if(motion_model == "CA"){
         if(dim == 2){
             state_vector << 0, 0, 0, 0, 0, 0;
-            cov_mat << 1, 0, 0, 0, 0, 0,
-                    0, 1, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 0,
-                    0, 0, 0, 1, 0, 0,
-                    0, 0, 0, 0, 10, 0,
-                    0, 0, 0, 0, 0, 10;
+            cov_mat << 0.01, 0, 0, 0, 0, 0,
+                    0, 0.01, 0, 0, 0, 0,
+                    0, 0, 0.01, 0, 0, 0,
+                    0, 0, 0, 0.01, 0, 0,
+                    0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 1;
         }else{
             state_vector << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-            cov_mat << 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 1, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 1, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 1, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 1, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 10, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 10, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 10;
+            cov_mat << 0.01, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0.01, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0.01, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0.01, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0.01, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0.01, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1;
         }
     }
 
@@ -116,15 +136,11 @@ void KalmanFilter::initialiseEstimates(double Q){
     x_pred = state_vector;
     phat_k = cov_mat;
     p_pred = cov_mat;
-    Qk = cov_mat;
 
-    for(unsigned int i = 0; i < states; i++){
-        for(unsigned int j = 0; j < states; j++){
-            if(i == j){
-                Qk(i,j) = Q;
-            }
-        }
-    }
+    Eigen::MatrixXd q(dim,dim);
+    q.setIdentity();
+
+    Qk = Q*G*q*(G.transpose());
 }
 
 // Börja felsök här
@@ -165,11 +181,11 @@ void KalmanFilter::runFilter(){
         int line_counter = 0;
         in.seek(0); // Place cursor at the start for some reason
         QString line;
-//        while(!in.atEnd()){
+        //        while(!in.atEnd()){
         while(in.readLineInto(&line)){
             if(k == line_counter){
                 // Read one line at a time
-//                QString line = in.readLine();
+                //                QString line = in.readLine();
                 qDebug() << "New data found in file: " << line;
 
                 QStringList measurements = line.split(" ");
@@ -193,16 +209,20 @@ void KalmanFilter::runFilter(){
 
                 // Calculate Sk
                 Eigen::MatrixXd Sk(nmeas, nmeas);
-                Sk << Rk + H*p_pred*(H.transpose());
+                Sk = Rk + H*p_pred*(H.transpose());
                 // Kalman gain
                 Eigen::MatrixXd Kk(states, nmeas);
-                Kk << p_pred*H.transpose()*Sk.inverse();
-                // Error
+                Kk = p_pred*(H.transpose())*(Sk.inverse());
+                // Innovation
                 Eigen::MatrixXd eps_k(nmeas,1);
-                eps_k << meas - H*x_pred;
+                eps_k = meas - H*x_pred;
                 // Update
                 xhat_k << x_pred + Kk*eps_k;
-                phat_k << p_pred - p_pred*H.transpose()*Sk.inverse()*H*p_pred;
+                //                phat_k << p_pred - p_pred*H.transpose()*Sk.inverse()*H*p_pred;
+                Eigen::MatrixXd I(states, states);
+                I.setIdentity();
+
+                phat_k = (I-Kk*H)*p_pred*((I-Kk*H).transpose())+Kk*Rk*(Kk.transpose());
 
                 k++;
 
@@ -264,4 +284,28 @@ void KalmanFilter::writeCovariance(QTextStream &out){
 void KalmanFilter::resetFilter(){
     k = 0;
     initialiseEstimates(Qk(1,1));
+}
+
+void KalmanFilter::setQ(double Q){
+    if(Q != Qk(0,0)){
+        Eigen::MatrixXd q(dim,dim);
+        q.setIdentity();
+        Qk = Q*G*q*(G.transpose());
+    }
+}
+
+void KalmanFilter::setR(double R){
+    if(R != Rk(0,0)){
+        Eigen::MatrixXd r(dim,dim);
+        r.setIdentity();
+        Rk = R*G*r*(G.transpose());
+    }
+}
+
+double KalmanFilter::getQ(){
+    return Qk(0,0);
+}
+
+double KalmanFilter::getR(){
+    return Rk(0,0);
 }

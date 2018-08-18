@@ -15,6 +15,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     ui->openGLWidget->setFocusPolicy(Qt::ClickFocus);
     ui->command_line->setFocusPolicy(Qt::ClickFocus);
     ui->centralWidget->setFocusPolicy(Qt::ClickFocus);
+    ui->Q_value->setFocusPolicy(Qt::ClickFocus);
+    ui->R_value->setFocusPolicy(Qt::ClickFocus);
 
     // Drawing variables
     elapsed = 0;
@@ -39,7 +41,7 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     // Initialise ekf
     qDebug() << "Initialize EKF";
     ekf_enabled = false;
-    ekf = KalmanFilter("CA", "accel", 2, 10, 10);
+    ekf = KalmanFilter("CA", "accel", 1, 0.05, 1);
     // Set states in brush
     brush.setStates(ekf.getStates());
     ekf.setMeasPath(meas_path);
@@ -58,6 +60,8 @@ BluetoothGUI::BluetoothGUI(QWidget *parent) :
     ui->draw_positions->setCheckState(Qt::Unchecked);
     ui->enable_ekf->setCheckState(Qt::Unchecked);
     ui->save_meas->setCheckState(Qt::Unchecked);
+    ui->Q_value->setText(QString::number(ekf.getQ()));
+    ui->R_value->setText(QString::number(ekf.getR()));
 
     // Connect Signals to appropriate Slots
 
@@ -246,6 +250,25 @@ void BluetoothGUI::keyReleaseEvent(QKeyEvent *event){
             // Send the command
             sendCommand();
         }
+    }else if(ui->Q_value->hasFocus() && key == Qt::Key_Return){
+        QString value = ui->Q_value->text();
+
+        if(!ekf_enabled){
+            ekf.setQ(value.toDouble());
+        }else{
+            qDebug() << "Can only be performed when ekf is not running";
+        }
+
+        ui->Q_value->setText(QString::number(ekf.getQ()));
+    }else if(ui->R_value->hasFocus() && key == Qt::Key_Return){
+        QString value = ui->R_value->text();
+        if(!ekf_enabled){
+            ekf.setR(value.toDouble());
+        }else{
+            qDebug() << "Can only be performed when ekf is not running";
+        }
+
+        ui->R_value->setText(QString::number(ekf.getR()));
     }
 }
 

@@ -26,6 +26,10 @@ public:
     void writeEstimate(QTextStream &out);
     void writeCovariance(QTextStream &out);
     void resetFilter();
+    void setQ(double Q);
+    void setR(double R);
+    double getQ();
+    double getR();
 
 private:
     // States and covmat for time k
@@ -39,6 +43,7 @@ private:
     // Hessians for sensor and motion model
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> G;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Rk;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Qk;
 

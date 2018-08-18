@@ -18,7 +18,7 @@ Painter::Painter()
     textPen = QPen(Qt::black);
     textFont.setPixelSize(50);
     // 10 pixels = 1 meter
-    image_scale = 10;
+    image_scale = 100;
     nstates = 2;
 }
 
@@ -66,7 +66,7 @@ void Painter::paint(QPainter *painter, QPaintEvent *event, int elapsed, double s
 
 bool Painter::drawPositions(QPainter *painter, double scale)
 {
-    float small_circle = 1;
+    float small_circle = 10;
     double drawing_scale = scale*image_scale;
 
     // Open files
@@ -86,6 +86,7 @@ bool Painter::drawPositions(QPainter *painter, double scale)
     // Read from file, one line at a time
     QString est_line;
 
+    int line_counter = 0;
     while(est_in.readLineInto(&est_line)){
 
         qDebug() << "Estimates read from file: " << est_line;
@@ -95,7 +96,7 @@ bool Painter::drawPositions(QPainter *painter, double scale)
 
         double x = estimates.at(0).toDouble();
         double y = estimates.at(1).toDouble();
-        double Pxx, Pxy, Pyx, Pyy;
+        double Pxx, Pxy, Pyx, Pyy = 0;
 
         QString cov_line;
         for(unsigned long i = 0; i < nstates; i++){
@@ -114,30 +115,35 @@ bool Painter::drawPositions(QPainter *painter, double scale)
 
         painter->setBrush(Qt::red);
         // Draw circle for position
-        QRect pos = QRect(drawing_scale*(x-small_circle/2), -drawing_scale*(y+small_circle/2)
-                          , drawing_scale*small_circle, drawing_scale*small_circle);
+        QRect pos = QRect(drawing_scale*x-small_circle/2, -(drawing_scale*y+small_circle/2)
+                          , small_circle, small_circle);
         qDebug() << "pos.x; " << pos.x() << "pos.y: " << pos.y() << "pos width: " << pos.width() << "pos height: " << pos.height();
         painter->drawEllipse(pos);
 
         // Draw circle for uncertainty
-        QRect P = QRect(drawing_scale*(x-2*qSqrt(Pxx)/2), -drawing_scale*(y+2*qSqrt(Pyy)/2)
-                        , 2*drawing_scale*qSqrt(Pxx), 2*drawing_scale*qSqrt(Pyy));
+        double xp = drawing_scale*(x-2*qSqrt(Pxx)/2);
+        double yp = -drawing_scale*(y+2*qSqrt(Pyy)/2);
+        double x_scale = 2*drawing_scale*qSqrt(Pxx);
+        double y_scale = 2*drawing_scale*qSqrt(Pyy);
+        QRect P = QRect(xp, yp, x_scale, y_scale);
         qDebug() << "P.x; " << P.x() << "P.y: " << P.y() << "P width: " << P.width() << "P height: " << P.height();
 
         painter->setBrush(QColor(0,0,255, 0));
         painter->drawEllipse(P);
+        painter->drawText(drawing_scale*x-small_circle/2+20, -(drawing_scale*y+small_circle/2), QString::number(line_counter));
+        line_counter++;
     }
 
     // Draw scale
     int offset = 10;
     painter->translate(image_translation.x(), image_translation.y());
     painter->save();
-    // Draw line representing 5 meters
+    // Draw line representing 1 meters
     QLine real_scale = QLine(-origin_x+offset, origin_y-offset,
-                             -origin_x+10*(drawing_scale)+offset,origin_y-offset);
+                             -origin_x+1*(drawing_scale)+offset,origin_y-offset);
     qDebug() << "p1: " << real_scale.p1() << "p2: " << real_scale.p2();
     painter->drawLine(real_scale);
-    painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "10 m");
+    painter->drawText(QPoint(-origin_x+2*offset, origin_y-offset*1.5), "1 m");
     qDebug() << "Return true";
     return true;
 }
